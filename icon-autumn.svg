@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Fondo Cálido Otoño: Marrón Claro y Crema Canela -->
+    <linearGradient id="autumnBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCF8F2"/>
+      <stop offset="50%" stop-color="#F3ECE2"/>
+      <stop offset="100%" stop-color="#E2D2C2"/>
+    </linearGradient>
+
+    <!-- Sombrero de Seta Bonita: Rojo Terracota Otoñal -->
+    <linearGradient id="mushroomCap" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#DE5E43"/>
+      <stop offset="60%" stop-color="#C2442A"/>
+      <stop offset="100%" stop-color="#992C18"/>
+    </linearGradient>
+
+    <!-- Tallo de Seta: Crema Cálido Porcelana -->
+    <linearGradient id="mushroomStem" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFDF9"/>
+      <stop offset="70%" stop-color="#F2E6D4"/>
+      <stop offset="100%" stop-color="#DDC8B0"/>
+    </linearGradient>
+
+    <!-- Hojita de Roble Otoño -->
+    <linearGradient id="oakLeaf" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E89838"/>
+      <stop offset="100%" stop-color="#B26017"/>
+    </linearGradient>
+
+    <!-- Musgo Verde Cálido -->
+    <linearGradient id="mossGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8DA362"/>
+      <stop offset="100%" stop-color="#556F39"/>
+    </linearGradient>
+
+    <filter id="softMushroomShadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#5C341F" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <!-- Fondo Squircle redondeado suave (PWA / App Icon) -->
+  <rect width="512" height="512" rx="128" fill="url(#autumnBgGrad)"/>
+  
+  <!-- Círculo interior rústico cálido con marco doble -->
+  <circle cx="256" cy="256" r="200" fill="#FAF4EA" stroke="#D7C2AD" stroke-width="5" filter="url(#softMushroomShadow)"/>
+  <circle cx="256" cy="256" r="188" fill="none" stroke="#E9DCD0" stroke-width="2" stroke-dasharray="7 6"/>
+
+  <!-- Brisas y destellos de otoño -->
+  <g opacity="0.8">
+    <path d="M 120,160 L 124,172 L 136,176 L 124,180 L 120,192 L 116,180 L 104,176 L 116,172 Z" fill="#D98A36"/>
+    <path d="M 390,170 L 394,180 L 404,184 L 394,188 L 390,198 L 386,188 L 376,184 L 386,180 Z" fill="#D98A36"/>
+    <path d="M 370,320 L 373,328 L 381,331 L 373,334 L 370,342 L 367,334 L 359,331 L 367,328 Z" fill="#D98A36"/>
+  </g>
+
+  <!-- Montículo de tierra y musgo de bosque -->
+  <ellipse cx="256" cy="380" rx="140" ry="34" fill="url(#mossGrad)" opacity="0.95"/>
+  <ellipse cx="256" cy="374" rx="120" ry="24" fill="#6A8545" opacity="0.4"/>
+
+  <!-- Hojas de otoño caídas en la base -->
+  <!-- Hoja roble izquierda -->
+  <path d="M 160,375 C 145,350 170,335 185,348 C 200,340 215,355 205,370 C 215,385 195,395 180,385 C 165,395 150,385 160,375 Z" fill="url(#oakLeaf)"/>
+  <line x1="165" y1="380" x2="195" y2="355" stroke="#87430B" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Bellotita acogedora a la derecha -->
+  <g transform="translate(330, 360) rotate(22)">
+    <ellipse cx="14" cy="20" rx="12" ry="16" fill="#A46433"/>
+    <path d="M 2,12 C 2,5 26,5 26,12 Z" fill="#693B18"/>
+    <line x1="14" y1="5" x2="16" y2="0" stroke="#4F2B10" stroke-width="3" stroke-linecap="round"/>
+  </g>
+
+  <!-- ================= SETA BONITA ================= -->
+  <!-- Tallo de la seta -->
+  <path d="M 215,260 C 210,310 195,355 210,380 C 230,388 282,388 302,380 C 317,355 302,310 297,260 Z" fill="url(#mushroomStem)"/>
+  
+  <!-- Sombra interior bajo el sombrero y anillo del tallo -->
+  <path d="M 205,270 Q 256,290 307,270 Q 256,278 205,270 Z" fill="#BF9F7D" opacity="0.6"/>
+  <ellipse cx="256" cy="265" rx="80" ry="16" fill="#E6D3BE"/>
+  <!-- Líneas de láminas suaves bajo el sombrero -->
+  <g stroke="#CDB196" stroke-width="2" opacity="0.7">
+    <line x1="256" y1="265" x2="256" y2="280"/>
+    <line x1="230" y1="265" x2="225" y2="277"/>
+    <line x1="282" y1="265" x2="287" y2="277"/>
+    <line x1="205" y1="265" x2="195" y2="272"/>
+    <line x1="307" y1="265" x2="317" y2="272"/>
+  </g>
+
+  <!-- Sombrero abombado de la seta (Cúpula Cottagecore) -->
+  <path d="M 140,265 C 135,160 210,130 256,130 C 302,130 377,160 372,265 C 330,278 182,278 140,265 Z" fill="url(#mushroomCap)"/>
+
+  <!-- Brillo superior suave en el sombrero -->
+  <path d="M 175,175 C 205,145 250,140 270,145 C 240,145 200,160 175,175 Z" fill="#FFFFFF" opacity="0.35"/>
+
+  <!-- Lunares blancos / motas de la seta (Estilo Amanita de Cuento) -->
+  <!-- Mota central grande -->
+  <ellipse cx="256" cy="180" rx="20" ry="17" fill="#FFFDF8"/>
+  <ellipse cx="254" cy="178" rx="14" ry="11" fill="#FFFFFF"/>
+
+  <!-- Motas laterales -->
+  <ellipse cx="195" cy="205" rx="17" ry="15" fill="#FFFDF8"/>
+  <ellipse cx="317" cy="205" rx="17" ry="15" fill="#FFFDF8"/>
+  <ellipse cx="230" cy="235" rx="14" ry="12" fill="#FFFDF8"/>
+  <ellipse cx="285" cy="235" rx="13" ry="11" fill="#FFFDF8"/>
+  
+  <ellipse cx="160" cy="245" rx="12" ry="9" fill="#FFFDF8"/>
+  <ellipse cx="350" cy="245" rx="12" ry="9" fill="#FFFDF8"/>
+
+  <ellipse cx="256" cy="145" rx="9" ry="7" fill="#FFFDF8"/>
+  <circle cx="190" cy="165" r="7" fill="#FFFDF8"/>
+  <circle cx="320" cy="165" r="7" fill="#FFFDF8"/>
+
+  <!-- Pequeña mota o gotita de rocío con brillo -->
+  <circle cx="280" cy="168" r="4" fill="#FFFFFF" opacity="0.8"/>
+  <circle cx="225" cy="190" r="3.5" fill="#FFFFFF" opacity="0.8"/>
+
+  <!-- Pequeño brote de trébol / hojita tierna saliendo del musgo -->
+  <g transform="translate(195, 370) scale(0.85)">
+    <path d="M 0,0 C -12,-16 0,-26 8,-12 C 16,-26 28,-16 16,0 Z" fill="#A2C364"/>
+    <line x1="8" y1="0" x2="8" y2="15" stroke="#5D7A31" stroke-width="2.5"/>
+  </g>
+</svg>
