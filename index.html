@@ -1,52 +1,60 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-season="autumn">
 <head>
   <meta charset="UTF-8">
-  <!-- Configuración esencial para móviles: evita zooms molestos y ajusta a toda la pantalla -->
+  <!-- Configuración móvil optimizada -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Mis Hobbies - Registro Personal</title>
+  <title>Mis Hobbies - Tu Rincón Creativo</title>
 
-  <!-- PWA Meta Tags para que Android y Xiaomi lo reconozcan como app -->
-  <meta name="theme-color" content="#FAF7F2">
+  <!-- PWA Meta Tags -->
+  <meta name="theme-color" id="metaThemeColor" content="#FAF5ED">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Mis Hobbies">
   <link rel="manifest" href="manifest.json">
 
-  <!-- Iconos para la app -->
+  <!-- Iconos acogedores para tu móvil Xiaomi -->
   <link rel="icon" type="image/svg+xml" href="icon.svg">
   <link rel="apple-touch-icon" href="icon-192.png">
 
-  <!-- Estilos visuales -->
+  <!-- Estilos visuales Cozy y Estacionales -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- ENCABEZADO DE LA APP -->
+  <!-- ENCABEZADO COZY CON SELECTOR DE ESTACIONES -->
   <header class="app-header">
     <div class="header-content">
       <div class="brand">
-        <span class="brand-icon">✨</span>
+        <div class="brand-icon-wrapper" title="Mis Hobbies">
+          <img src="icon.svg" alt="Icono Mis Hobbies">
+        </div>
         <div>
           <h1 class="brand-title">Mis Hobbies</h1>
-          <p class="brand-subtitle" id="currentDate">Tu rincón creativo</p>
+          <button id="seasonPill" class="season-pill" onclick="openSeasonModal()" title="Toca para cambiar la estación del año">
+            <span id="seasonPillIcon">🍂</span>
+            <span id="seasonPillText">Otoño Cálido</span>
+            <small style="opacity:0.7;">▾</small>
+          </button>
         </div>
       </div>
-      <button id="btnBackupModal" class="btn-icon" title="Copia de seguridad y ajustes" aria-label="Ajustes y copia">
-        💾
-      </button>
+      <div class="header-actions">
+        <button id="btnBackupModal" class="btn-icon" title="Copia de seguridad y ajustes" aria-label="Ajustes y copia">
+          💾
+        </button>
+      </div>
     </div>
   </header>
 
-  <!-- CONTENEDOR PRINCIPAL DE PESTAÑAS -->
+  <!-- CONTENIDO PRINCIPAL -->
   <main class="app-main">
     
     <!-- PESTAÑA 1: CROCHET / TEJER -->
     <section id="tab-crochet" class="tab-content active">
       <div class="section-banner crochet-theme">
         <div class="banner-text">
-          <h2>Tejer & Ganchillo 🧶</h2>
-          <p>Lleva la cuenta exacta de tus vueltas y patrones</p>
+          <h2>Rincón de Lana & Agujas 🧶</h2>
+          <p>Manta suave, vueltas contadas y mente en calma</p>
         </div>
         <button class="btn btn-primary" onclick="openNewProjectModal('crochet')">
           + Nuevo Proyecto
@@ -54,7 +62,7 @@
       </div>
 
       <div id="crochet-list" class="cards-container">
-        <!-- Las tarjetas se generan dinámicamente con JavaScript -->
+        <!-- Las tarjetas se generan dinámicamente -->
       </div>
     </section>
 
@@ -62,8 +70,8 @@
     <section id="tab-diamond" class="tab-content">
       <div class="section-banner diamond-theme">
         <div class="banner-text">
-          <h2>Pintura de Diamantes 💎</h2>
-          <p>Organiza tus lienzos, avances y códigos de color</p>
+          <h2>Lienzos & Diamantes 💎</h2>
+          <p>Brillo a brillo, despacio y con ilusión</p>
         </div>
         <button class="btn btn-primary" onclick="openNewProjectModal('diamond')">
           + Nuevo Cuadro
@@ -71,7 +79,7 @@
       </div>
 
       <div id="diamond-list" class="cards-container">
-        <!-- Las tarjetas se generan dinámicamente con JavaScript -->
+        <!-- Las tarjetas se generan dinámicamente -->
       </div>
     </section>
 
@@ -79,8 +87,8 @@
     <section id="tab-reading" class="tab-content">
       <div class="section-banner reading-theme">
         <div class="banner-text">
-          <h2>Lectura & Libros 📚</h2>
-          <p>Tus páginas leídas, valoraciones y citas favoritas</p>
+          <h2>Lectura & Café 📚</h2>
+          <p>Un buen libro, una taza caliente y mil historias</p>
         </div>
         <button class="btn btn-primary" onclick="openNewProjectModal('reading')">
           + Nuevo Libro
@@ -88,31 +96,74 @@
       </div>
 
       <div id="reading-list" class="cards-container">
-        <!-- Las tarjetas se generan dinámicamente con JavaScript -->
+        <!-- Las tarjetas se generan dinámicamente -->
       </div>
     </section>
 
   </main>
 
-  <!-- BARRA DE NAVEGACIÓN INFERIOR (Estilo App Móvil Nativa) -->
+  <!-- BARRA DE NAVEGACIÓN INFERIOR COZY -->
   <nav class="bottom-nav">
     <button class="nav-item active" data-tab="tab-crochet">
       <span class="nav-icon">🧶</span>
-      <span class="nav-label">Crochet</span>
+      <span class="nav-label">Tejer</span>
     </button>
     <button class="nav-item" data-tab="tab-diamond">
       <span class="nav-icon">💎</span>
       <span class="nav-label">Diamantes</span>
     </button>
     <button class="nav-item" data-tab="tab-reading">
-      <span class="nav-icon">📚</span>
+      <span class="nav-icon">☕</span>
       <span class="nav-label">Lectura</span>
     </button>
   </nav>
 
   <!-- ========================================== -->
-  <!-- MODALES FLOTANTES PARA AÑADIR PROYECTOS    -->
+  <!-- MODALES FLOTANTES                          -->
   <!-- ========================================== -->
+
+  <!-- Modal: Selector de Estaciones del Año -->
+  <div id="modal-season" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>✨ Elige la Estación del Año</h3>
+        <button class="modal-close" onclick="closeModal('modal-season')">&times;</button>
+      </div>
+      <p class="modal-description">
+        Tu app se adapta automáticamente al calendario, pero puedes elegir la vibra que más te apetezca hoy:
+      </p>
+
+      <div class="seasons-grid">
+        <button class="season-choice-btn" id="season-choice-autumn" onclick="selectSeason('autumn')">
+          <span class="season-choice-icon">🍂</span>
+          <span class="season-choice-title">Otoño Cozy</span>
+          <span class="season-choice-desc">Canela, calabaza y miel</span>
+        </button>
+
+        <button class="season-choice-btn" id="season-choice-winter" onclick="selectSeason('winter')">
+          <span class="season-choice-icon">❄️</span>
+          <span class="season-choice-title">Invierno Cozy</span>
+          <span class="season-choice-desc">Chocolate y bayas rojas</span>
+        </button>
+
+        <button class="season-choice-btn" id="season-choice-spring" onclick="selectSeason('spring')">
+          <span class="season-choice-icon">🌸</span>
+          <span class="season-choice-title">Primavera Cozy</span>
+          <span class="season-choice-desc">Matcha y flor de cerezo</span>
+        </button>
+
+        <button class="season-choice-btn" id="season-choice-summer" onclick="selectSeason('summer')">
+          <span class="season-choice-icon">☀️</span>
+          <span class="season-choice-title">Verano Cozy</span>
+          <span class="season-choice-desc">Melocotón y sol dorado</span>
+        </button>
+      </div>
+
+      <button class="btn btn-secondary btn-block" style="margin-top:10px;" onclick="selectSeason('auto')">
+        🔄 Adaptación Automática (según la fecha de hoy)
+      </button>
+    </div>
+  </div>
 
   <!-- Modal: Nuevo Proyecto Crochet -->
   <div id="modal-crochet" class="modal-overlay">
@@ -124,16 +175,16 @@
       <form id="form-crochet" onsubmit="handleSaveCrochet(event)">
         <div class="form-group">
           <label for="crochet-name">Nombre del proyecto *</label>
-          <input type="text" id="crochet-name" placeholder="Ej: Bufanda de invierno, Amigurumi oso" required>
+          <input type="text" id="crochet-name" placeholder="Ej: Manta de ochos, Bufanda suave, Amigurumi" required>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label for="crochet-yarn">Tipo de lana / hilo</label>
-            <input type="text" id="crochet-yarn" placeholder="Ej: Lana Merino, Algodón">
+            <label for="crochet-yarn">Lana / Hilo</label>
+            <input type="text" id="crochet-yarn" placeholder="Ej: Merino, Algodón, Alpaca">
           </div>
           <div class="form-group">
             <label for="crochet-color">Color</label>
-            <input type="text" id="crochet-color" placeholder="Ej: Mostaza, Rosa empolvado">
+            <input type="text" id="crochet-color" placeholder="Ej: Terracota, Canela, Salvia">
           </div>
         </div>
         <div class="form-row">
@@ -142,13 +193,13 @@
             <input type="text" id="crochet-hook" placeholder="Ej: 4.5 mm, 5.0 mm">
           </div>
           <div class="form-group">
-            <label for="crochet-target">Meta de vueltas (opcional)</label>
-            <input type="number" id="crochet-target" min="0" placeholder="Ej: 100">
+            <label for="crochet-target">Meta de vueltas</label>
+            <input type="number" id="crochet-target" min="0" placeholder="Ej: 80">
           </div>
         </div>
         <div class="form-group">
-          <label for="crochet-notes">Notas o patrón</label>
-          <textarea id="crochet-notes" rows="3" placeholder="Puntos a usar, instrucciones clave o recordatorios..."></textarea>
+          <label for="crochet-notes">Notas del patrón o recordatorios</label>
+          <textarea id="crochet-notes" rows="3" placeholder="Puntos especiales, repeticiones de vueltas..."></textarea>
         </div>
         <div class="modal-actions">
           <button type="button" class="btn btn-secondary" onclick="closeModal('modal-crochet')">Cancelar</button>
@@ -168,7 +219,7 @@
       <form id="form-diamond" onsubmit="handleSaveDiamond(event)">
         <div class="form-group">
           <label for="diamond-name">Nombre o temática del lienzo *</label>
-          <input type="text" id="diamond-name" placeholder="Ej: Paisaje de bosque, Gato mandala" required>
+          <input type="text" id="diamond-name" placeholder="Ej: Casita en el bosque, Flores de té" required>
         </div>
         <div class="form-row">
           <div class="form-group">
@@ -182,11 +233,11 @@
         </div>
         <div class="form-group">
           <label for="diamond-codes">Códigos de diamantes / Colores pendientes</label>
-          <textarea id="diamond-codes" rows="2" placeholder="Ej: Faltan DMC 310 y DMC 823; pedir bolsitas extra..."></textarea>
+          <textarea id="diamond-codes" rows="2" placeholder="Ej: DMC 310 (Negro), DMC 823 (Azul noche)..."></textarea>
         </div>
         <div class="form-group">
           <label for="diamond-notes">Notas adicionales</label>
-          <textarea id="diamond-notes" rows="2" placeholder="Tipo de diamante (redondo/cuadrado), tienda..."></textarea>
+          <textarea id="diamond-notes" rows="2" placeholder="Diamantes cuadrados/redondos, cera aromática..."></textarea>
         </div>
         <div class="modal-actions">
           <button type="button" class="btn btn-secondary" onclick="closeModal('modal-diamond')">Cancelar</button>
@@ -200,17 +251,17 @@
   <div id="modal-reading" class="modal-overlay">
     <div class="modal-box">
       <div class="modal-header">
-        <h3>📚 Nuevo Libro</h3>
+        <h3>☕ Nuevo Libro</h3>
         <button class="modal-close" onclick="closeModal('modal-reading')">&times;</button>
       </div>
       <form id="form-reading" onsubmit="handleSaveReading(event)">
         <div class="form-group">
           <label for="reading-title">Título del libro *</label>
-          <input type="text" id="reading-title" placeholder="Ej: La sombra del viento" required>
+          <input type="text" id="reading-title" placeholder="Ej: La biblioteca de la medianoche" required>
         </div>
         <div class="form-group">
           <label for="reading-author">Autor / Autora</label>
-          <input type="text" id="reading-author" placeholder="Ej: Carlos Ruiz Zafón">
+          <input type="text" id="reading-author" placeholder="Ej: Matt Haig">
         </div>
         <div class="form-row">
           <div class="form-group">
@@ -219,11 +270,11 @@
           </div>
           <div class="form-group">
             <label for="reading-total-pages">Total de páginas *</label>
-            <input type="number" id="reading-total-pages" min="1" placeholder="Ej: 480" required>
+            <input type="number" id="reading-total-pages" min="1" placeholder="Ej: 340" required>
           </div>
         </div>
         <div class="form-group">
-          <label>Valoración inicial</label>
+          <label>Valoración</label>
           <div class="star-rating-input" id="new-book-rating">
             <span class="star-input" data-value="1">★</span>
             <span class="star-input" data-value="2">★</span>
@@ -235,7 +286,7 @@
         </div>
         <div class="form-group">
           <label for="reading-quotes">Citas favoritas o reflexiones</label>
-          <textarea id="reading-quotes" rows="3" placeholder="Apunta frases que te hayan gustado o un resumen..."></textarea>
+          <textarea id="reading-quotes" rows="3" placeholder="Frases hermosas o lo que te hace sentir el libro..."></textarea>
         </div>
         <div class="modal-actions">
           <button type="button" class="btn btn-secondary" onclick="closeModal('modal-reading')">Cancelar</button>
@@ -245,7 +296,7 @@
     </div>
   </div>
 
-  <!-- Modal: Copia de Seguridad y Datos -->
+  <!-- Modal: Copia de Seguridad -->
   <div id="modal-backup" class="modal-overlay">
     <div class="modal-box">
       <div class="modal-header">
@@ -253,37 +304,37 @@
         <button class="modal-close" onclick="closeModal('modal-backup')">&times;</button>
       </div>
       <p class="modal-description">
-        Todos tus proyectos se guardan automáticamente en tu móvil. Si quieres cambiar de teléfono o tener una copia a salvo, puedes descargarla aquí.
+        Todos tus hobbies y notas se guardan de forma segura en la memoria de tu teléfono. Puedes descargar una copia de respaldo cuando quieras.
       </p>
 
-      <div class="backup-actions">
+      <div class="backup-actions" style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
         <button class="btn btn-primary btn-block" onclick="exportDataBackup()">
-          ⬇️ Descargar Copia de Mis Hobbies (JSON)
+          ⬇️ Descargar Copia (JSON)
         </button>
 
-        <label class="btn btn-secondary btn-block file-upload-label">
+        <label class="btn btn-secondary btn-block" style="text-align:center; cursor:pointer;">
           ⬆️ Restaurar Copia desde Archivo
           <input type="file" id="backupFileInput" accept=".json" onchange="importDataBackup(event)" style="display:none;">
         </label>
       </div>
 
-      <div class="app-version-info">
-        <p><strong>Mis Hobbies PWA</strong> · Versión 1.0</p>
+      <div class="app-version-info" style="border-top:1px solid var(--border-card); padding-top:14px; text-align:center; font-size:0.8rem; color:var(--text-muted);">
+        <p><strong>Mis Hobbies Cozy</strong> · Edición Estacional</p>
         <p>Funciona 100% sin conexión a internet.</p>
       </div>
     </div>
   </div>
 
-  <!-- Script principal de la aplicación -->
+  <!-- Scripts -->
   <script src="app.js"></script>
 
-  <!-- Registro del Service Worker para funcionamiento PWA -->
+  <!-- Service Worker -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
-          .then((reg) => console.log('Service Worker registrado con éxito:', reg.scope))
-          .catch((err) => console.log('Error registrando Service Worker:', err));
+          .then((reg) => console.log('Service Worker Cozy registrado:', reg.scope))
+          .catch((err) => console.log('Error SW:', err));
       });
     }
   </script>
