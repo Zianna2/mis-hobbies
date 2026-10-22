@@ -90,11 +90,102 @@ const initialSampleData = {
 document.addEventListener('DOMContentLoaded', () => {
   loadData();
   setupSeasonSystem();
+  setupLunarAndQuoteWidget();
   setupNavigation();
   setupBackupModal();
   setupStarRatingInput();
   renderAll();
 });
+
+// ========================================================
+// RINCÓN COTTAGECORE: CICLO LUNAR Y PENSAMIENTOS
+// ========================================================
+const COTTAGECORE_QUOTES = [
+  { text: "«No hay nada más poético que un libro abierto junto a una taza de té y una tarde de calma.»", author: "— Virginia Woolf" },
+  { text: "«Declaro que después de todo no hay placer como la lectura. ¡Cuánto más pronto se cansa uno de cualquier cosa que de un libro!»", author: "— Jane Austen" },
+  { text: "«Para viajar lejos, no hay mejor nave que un libro.»", author: "— Emily Dickinson" },
+  { text: "«Tengo una pasión infinita por las cosas simples: una manta cálida, un té humeante y una labor que avanza entre las manos.»", author: "— Louisa May Alcott" },
+  { text: "«Mantén tu amor hacia la naturaleza, porque es la verdadera forma de entender el arte.»", author: "— Vincent van Gogh" },
+  { text: "«Tejer es darle forma al tiempo con las manos; cada vuelta es un minuto de paciencia y ternura.»", author: "— Proverbio artesano" },
+  { text: "«Dime, ¿qué planeas hacer con tu única, salvaje y preciosa vida?»", author: "— Mary Oliver" },
+  { text: "«Las cosas hechas a mano llevan dentro un latido del alma de quien las creó con paciencia.»", author: "— Tradición cottagecore" },
+  { text: "«Brilla a tu propio ritmo; hasta la luna pasa por fases antes de estar completa y radiante.»", author: "— Sabiduría popular" },
+  { text: "«El arte de crear con calma cura las prisas del mundo exterior.»", author: "— Pensamiento sereno" },
+  { text: "«Un hogar acogedor no se mide en metros, sino en mantas suaves, libros leídos y proyectos con ilusión.»", author: "— Rincón cozy" }
+];
+
+let currentQuoteIndex = 0;
+
+function setupLunarAndQuoteWidget() {
+  // 1. Calcular ciclo lunar
+  const moon = calculateMoonPhase(new Date());
+  const emojiEl = document.getElementById('lunarEmoji');
+  const nameEl = document.getElementById('lunarName');
+  const illumEl = document.getElementById('lunarIllum');
+  const counselEl = document.getElementById('lunarCounsel');
+
+  if (emojiEl) emojiEl.textContent = moon.emoji;
+  if (nameEl) nameEl.textContent = moon.name;
+  if (illumEl) illumEl.textContent = `${moon.illumination}% iluminada`;
+  if (counselEl) counselEl.textContent = moon.counsel;
+
+  // 2. Frase del día según el día del año
+  const today = new Date();
+  currentQuoteIndex = (today.getDate() + today.getMonth() * 3) % COTTAGECORE_QUOTES.length;
+  renderCurrentQuote();
+}
+
+function renderCurrentQuote() {
+  const quote = COTTAGECORE_QUOTES[currentQuoteIndex];
+  const textEl = document.getElementById('quoteText');
+  const authorEl = document.getElementById('quoteAuthor');
+
+  if (textEl && authorEl) {
+    textEl.style.opacity = '0';
+    setTimeout(() => {
+      textEl.textContent = quote.text;
+      authorEl.textContent = quote.author;
+      textEl.style.transition = 'opacity 0.25s ease';
+      textEl.style.opacity = '1';
+    }, 120);
+  }
+}
+
+function nextInspiringQuote() {
+  currentQuoteIndex = (currentQuoteIndex + 1) % COTTAGECORE_QUOTES.length;
+  renderCurrentQuote();
+  vibratePhone(18);
+}
+
+// Cálculo astronómico del ciclo lunar
+function calculateMoonPhase(date = new Date()) {
+  const reference = new Date(Date.UTC(2000, 0, 6, 18, 14, 0));
+  const diffDays = (date.getTime() - reference.getTime()) / (1000 * 60 * 60 * 24);
+  const synodic = 29.53058867; // Duración media del mes lunar
+  let phase = (diffDays % synodic) / synodic;
+  if (phase < 0) phase += 1;
+
+  // Porcentaje de iluminación (0% a 100%)
+  const illumination = Math.round((1 - Math.cos(phase * 2 * Math.PI)) / 2 * 100);
+
+  if (phase < 0.03 || phase >= 0.97) {
+    return { name: 'Luna Nueva', emoji: '🌑', illumination, counsel: 'Semilla y comienzos. Tiempo ideal para ordenar tus lanas y soñar con nuevas labores.' };
+  } else if (phase < 0.22) {
+    return { name: 'Luna Creciente', emoji: '🌒', illumination, counsel: 'Fuerza que despierta. Excelente momento para montar los primeros puntos de tu labor.' };
+  } else if (phase < 0.28) {
+    return { name: 'Cuarto Creciente', emoji: '🌓', illumination, counsel: 'Crecimiento y constancia. Buen momento para mantener el ritmo de vueltas y páginas.' };
+  } else if (phase < 0.47) {
+    return { name: 'Gibosa Creciente', emoji: '🌔', illumination, counsel: 'La labor toma forma. Disfruta de los detalles minuciosos y del brillo de cada gema.' };
+  } else if (phase < 0.53) {
+    return { name: 'Luna Llena', emoji: '🌕', illumination, counsel: 'Plenitud y luz clara. Noche perfecta para admirar tu avance con una taza de té humeante.' };
+  } else if (phase < 0.72) {
+    return { name: 'Gibosa Menguante', emoji: '🌖', illumination, counsel: 'Gratitud y maduración. Saborea cada capítulo leído y cada lienzo casi completado.' };
+  } else if (phase < 0.78) {
+    return { name: 'Cuarto Menguante', emoji: '🌗', illumination, counsel: 'Soltar y serenar. Momento idóneo para rematar hebras, pulir detalles y relajarte.' };
+  } else {
+    return { name: 'Luna Menguante', emoji: '🌘', illumination, counsel: 'Descanso y recogimiento. Apaga las prisas, enciende una vela y déjate llevar.' };
+  }
+}
 
 // Feedback táctil con vibración suave
 function vibratePhone(ms = 22) {
