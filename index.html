@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <!-- Configuración móvil optimizada -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Mis Hobbies - Tu Rincón Creativo</title>
+  <title>Mis Hobbies - Rincón Cozy & Cottagecore</title>
 
   <!-- PWA Meta Tags -->
   <meta name="theme-color" id="metaThemeColor" content="#FAF5ED">
@@ -13,8 +13,8 @@
   <meta name="apple-mobile-web-app-title" content="Mis Hobbies">
   <link rel="manifest" href="manifest.json">
 
-  <!-- Iconos acogedores para tu móvil Xiaomi -->
-  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <!-- Iconos de la aplicación en el móvil -->
+  <link rel="icon" type="image/png" href="icon-192.png">
   <link rel="apple-touch-icon" href="icon-192.png">
 
   <!-- Estilos visuales Cozy y Estacionales -->
@@ -27,7 +27,7 @@
     <div class="header-content">
       <div class="brand">
         <div class="brand-icon-wrapper" title="Mis Hobbies">
-          <img src="icon.svg" alt="Icono Mis Hobbies">
+          <img src="icon-192.png" alt="Icono Mis Hobbies">
         </div>
         <div>
           <h1 class="brand-title">Mis Hobbies</h1>
@@ -39,7 +39,7 @@
         </div>
       </div>
       <div class="header-actions">
-        <button id="btnBackupModal" class="btn-icon" title="Copia de seguridad y ajustes" aria-label="Ajustes y copia">
+        <button id="btnBackupModal" class="btn-icon" title="Copia de seguridad y datos" aria-label="Ajustes y copia">
           💾
         </button>
       </div>
@@ -48,55 +48,98 @@
 
   <!-- CONTENIDO PRINCIPAL -->
   <main class="app-main">
-    
+
+    <!-- ========================================== -->
+    <!-- RINCÓN MÍSTICO: CICLO LUNAR & FRASE DEL DÍA -->
+    <!-- ========================================== -->
+    <section class="cottagecore-daily-card">
+      <!-- Módulo del Ciclo Lunar de Hoy -->
+      <div class="lunar-widget">
+        <div class="lunar-orb-wrapper">
+          <span class="lunar-emoji" id="lunarEmoji">🌕</span>
+        </div>
+        <div class="lunar-details">
+          <div class="lunar-header">
+            <span class="lunar-tag">Ciclo Lunar de Hoy</span>
+            <span class="lunar-illumination" id="lunarIllum">88% iluminada</span>
+          </div>
+          <h3 class="lunar-name" id="lunarName">Luna Gibosa Creciente</h3>
+          <p class="lunar-counsel" id="lunarCounsel">Noche propicia para dar puntadas con calma y encender una vela aromática.</p>
+        </div>
+      </div>
+
+      <!-- Módulo de Frase Inspiradora Cottagecore -->
+      <div class="quote-widget">
+        <div class="quote-header">
+          <span class="quote-label">🌿 Pensamiento del Día</span>
+          <button class="btn-refresh-quote" onclick="nextInspiringQuote()" title="Descubrir otra frase">
+            ✨ Otra frase
+          </button>
+        </div>
+        <blockquote class="quote-text" id="quoteText">
+          «No hay nada más poético que un libro abierto junto a una taza de té y una tarde de calma.»
+        </blockquote>
+        <cite class="quote-author" id="quoteAuthor">— Virginia Woolf</cite>
+      </div>
+    </section>
+
     <!-- PESTAÑA 1: CROCHET / TEJER -->
     <section id="tab-crochet" class="tab-content active">
-      <div class="section-banner crochet-theme">
-        <div class="banner-text">
-          <h2>Rincón de Lana & Agujas 🧶</h2>
-          <p>Manta suave, vueltas contadas y mente en calma</p>
+      <div class="banner-illustration-box">
+        <img src="art-crochet.jpg" alt="Rincón de Lana y Agujas" class="banner-art-img">
+        <div class="banner-art-overlay">
+          <div class="banner-text">
+            <h2>Rincón de Lana & Agujas 🧶</h2>
+            <p>Manta suave, vueltas contadas y mente en calma</p>
+          </div>
+          <button class="btn btn-primary btn-banner-action" onclick="openNewProjectModal('crochet')">
+            + Nuevo Proyecto
+          </button>
         </div>
-        <button class="btn btn-primary" onclick="openNewProjectModal('crochet')">
-          + Nuevo Proyecto
-        </button>
       </div>
 
       <div id="crochet-list" class="cards-container">
-        <!-- Las tarjetas se generan dinámicamente -->
+        <!-- Tarjetas dinámicas -->
       </div>
     </section>
 
     <!-- PESTAÑA 2: DIAMOND PAINTING -->
     <section id="tab-diamond" class="tab-content">
-      <div class="section-banner diamond-theme">
-        <div class="banner-text">
-          <h2>Lienzos & Diamantes 💎</h2>
-          <p>Brillo a brillo, despacio y con ilusión</p>
+      <div class="banner-illustration-box">
+        <img src="art-diamond.jpg" alt="Lienzos y Diamantes" class="banner-art-img">
+        <div class="banner-art-overlay">
+          <div class="banner-text">
+            <h2>Lienzos & Diamantes 💎</h2>
+            <p>Brillo a brillo, despacio y con ilusión</p>
+          </div>
+          <button class="btn btn-primary btn-banner-action" onclick="openNewProjectModal('diamond')">
+            + Nuevo Cuadro
+          </button>
         </div>
-        <button class="btn btn-primary" onclick="openNewProjectModal('diamond')">
-          + Nuevo Cuadro
-        </button>
       </div>
 
       <div id="diamond-list" class="cards-container">
-        <!-- Las tarjetas se generan dinámicamente -->
+        <!-- Tarjetas dinámicas -->
       </div>
     </section>
 
     <!-- PESTAÑA 3: LECTURA -->
     <section id="tab-reading" class="tab-content">
-      <div class="section-banner reading-theme">
-        <div class="banner-text">
-          <h2>Lectura & Café 📚</h2>
-          <p>Un buen libro, una taza caliente y mil historias</p>
+      <div class="banner-illustration-box">
+        <img src="art-reading.jpg" alt="Lectura y Café" class="banner-art-img">
+        <div class="banner-art-overlay">
+          <div class="banner-text">
+            <h2>Lectura & Café 📚</h2>
+            <p>Un buen libro, una taza caliente y mil historias</p>
+          </div>
+          <button class="btn btn-primary btn-banner-action" onclick="openNewProjectModal('reading')">
+            + Nuevo Libro
+          </button>
         </div>
-        <button class="btn btn-primary" onclick="openNewProjectModal('reading')">
-          + Nuevo Libro
-        </button>
       </div>
 
       <div id="reading-list" class="cards-container">
-        <!-- Las tarjetas se generan dinámicamente -->
+        <!-- Tarjetas dinámicas -->
       </div>
     </section>
 
@@ -319,7 +362,7 @@
       </div>
 
       <div class="app-version-info" style="border-top:1px solid var(--border-card); padding-top:14px; text-align:center; font-size:0.8rem; color:var(--text-muted);">
-        <p><strong>Mis Hobbies Cozy</strong> · Edición Estacional</p>
+        <p><strong>Mis Hobbies Cozy</strong> · Edición Cottagecore & Lunar</p>
         <p>Funciona 100% sin conexión a internet.</p>
       </div>
     </div>
@@ -333,7 +376,7 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
-          .then((reg) => console.log('Service Worker Cozy registrado:', reg.scope))
+          .then((reg) => console.log('Service Worker Cottagecore registrado:', reg.scope))
           .catch((err) => console.log('Error SW:', err));
       });
     }
