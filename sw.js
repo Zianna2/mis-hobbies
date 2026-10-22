@@ -1,18 +1,24 @@
-// Service Worker para Mis Hobbies PWA - Versión Cozy Cottagecore 3.0
-const CACHE_NAME = 'hobbies-pwa-v3';
+// Service Worker para Mis Hobbies PWA - Versión Cozy Cottagecore 4.0
+const CACHE_NAME = 'hobbies-pwa-v4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './style.css',
   './app.js',
+  './nature-data.js',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
   './icon.svg',
+  './icon-autumn.svg',
+  './icon-winter.svg',
+  './icon-spring.svg',
+  './icon-summer.svg',
   './icon-cottagecore.jpg',
   './art-crochet.jpg',
   './art-diamond.jpg',
-  './art-reading.jpg'
+  './art-reading.jpg',
+  './art-plants.jpg'
 ];
 
 self.addEventListener('install', (event) => {
