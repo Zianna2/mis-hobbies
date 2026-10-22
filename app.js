@@ -1,9 +1,44 @@
 // ========================================================
-// MIS HOBBIES - LÓGICA DE LA APLICACIÓN (JAVASCRIPT)
-// Almacenamiento local, reactividad y gestión de datos
+// MIS HOBBIES - LÓGICA COZY & ADAPTACIÓN ESTACIONAL
 // ========================================================
 
 const STORAGE_KEY = 'mis_hobbies_data_v1';
+const SEASON_STORAGE_KEY = 'mis_hobbies_season_preference';
+
+// Configuración de las 4 estaciones del año
+const SEASONS = {
+  autumn: {
+    id: 'autumn',
+    name: 'Otoño Cálido',
+    icon: '🍂',
+    themeColor: '#FAF5ED',
+    desc: 'Canela & Miel'
+  },
+  winter: {
+    id: 'winter',
+    name: 'Invierno Cozy',
+    icon: '❄️',
+    themeColor: '#F4F6F9',
+    desc: 'Chocolate & Nieve'
+  },
+  spring: {
+    id: 'spring',
+    name: 'Primavera Dulce',
+    icon: '🌸',
+    themeColor: '#FAF7F4',
+    desc: 'Matcha & Flores'
+  },
+  summer: {
+    id: 'summer',
+    name: 'Verano Serena',
+    icon: '☀️',
+    themeColor: '#FFFDF9',
+    desc: 'Melocotón & Sol'
+  }
+};
+
+let currentSeasonSetting = 'auto'; // 'auto', 'autumn', 'winter', 'spring', 'summer'
+let activeSeasonKey = 'autumn';
 
 // Estado global de la aplicación
 let appData = {
@@ -12,101 +47,159 @@ let appData = {
   reading: []
 };
 
-// Datos de ejemplo para que la app no empiece vacía la primera vez
+// Datos iniciales de ejemplo acogedores
 const initialSampleData = {
   crochet: [
     {
       id: 'sample-crochet-1',
-      name: 'Bufanda de lana suave',
-      yarn: 'Lana Merino 100%',
-      color: 'Mostaza cálido',
-      hook: '5.0 mm',
-      current: 24,
-      target: 80,
-      notes: 'Punto inglés: alternar punto del derecho y del revés. Recordar cambiar de ovillo en la vuelta 40.'
+      name: 'Manta de ochos y lana gruesa',
+      yarn: 'Lana Merino & Alpaca',
+      color: 'Terracota otoñal',
+      hook: '6.0 mm',
+      current: 28,
+      target: 90,
+      notes: 'Punto arroz doble en los bordes. Tejer con calma mientras tomo un té caliente.'
     }
   ],
   diamond: [
     {
       id: 'sample-diamond-1',
-      name: 'Atardecer en el bosque',
+      name: 'Cabaña en el bosque al atardecer',
       size: '40 x 50 cm',
-      progress: 35,
-      codes: 'DMC 310 (Negro), DMC 823 (Azul noche). Faltan bolsitas de repuesto para el cielo.',
-      notes: 'Diamantes cuadrados. Empezado por la esquina superior izquierda.'
+      progress: 42,
+      codes: 'DMC 310 (Negro), DMC 434 (Marrón canela), DMC 742 (Dorado atardecer).',
+      notes: 'Diamantes cuadrados con cera perfumada a vainilla.'
     }
   ],
   reading: [
     {
       id: 'sample-reading-1',
-      title: 'El Principito',
-      author: 'Antoine de Saint-Exupéry',
-      currentPage: 64,
-      totalPages: 120,
+      title: 'La biblioteca de la medianoche',
+      author: 'Matt Haig',
+      currentPage: 145,
+      totalPages: 330,
       rating: 5,
-      quotes: '«Lo esencial es invisible a los ojos». «Eres responsable para siempre de lo que has domesticado».'
+      quotes: '«Nunca subestimes la gran importancia de las cosas pequeñas». Una lectura preciosa para una tarde tranquila.'
     }
   ]
 };
 
 // ========================================================
-// INICIALIZACIÓN DE LA APP AL CARGAR LA PÁGINA
+// INICIALIZACIÓN
 // ========================================================
 document.addEventListener('DOMContentLoaded', () => {
   loadData();
+  setupSeasonSystem();
   setupNavigation();
-  setupDateDisplay();
   setupBackupModal();
   setupStarRatingInput();
   renderAll();
 });
 
-// Vibración táctil para el móvil (feedback háptico)
-function vibratePhone(ms = 25) {
+// Feedback táctil con vibración suave
+function vibratePhone(ms = 22) {
   if ('vibrate' in navigator) {
     try {
       navigator.vibrate(ms);
     } catch (e) {
-      // Ignorar si el navegador bloquea la vibración
+      // Ignorar si no está soportado
     }
   }
 }
 
-// Cargar datos desde el LocalStorage del móvil
+// Cargar datos
 function loadData() {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) {
     try {
       appData = JSON.parse(saved);
-      // Asegurarse de que existan los 3 arrays
       if (!Array.isArray(appData.crochet)) appData.crochet = [];
       if (!Array.isArray(appData.diamond)) appData.diamond = [];
       if (!Array.isArray(appData.reading)) appData.reading = [];
     } catch (e) {
-      console.error('Error al leer datos guardados:', e);
+      console.error('Error al leer datos:', e);
       appData = JSON.parse(JSON.stringify(initialSampleData));
       saveData();
     }
   } else {
-    // Primera vez abriendo la app
     appData = JSON.parse(JSON.stringify(initialSampleData));
     saveData();
   }
 }
 
-// Guardar datos en el teléfono
 function saveData() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
 }
 
-// Fecha formateada en español en el encabezado
-function setupDateDisplay() {
-  const dateElement = document.getElementById('currentDate');
-  if (dateElement) {
-    const today = new Date();
-    const options = { weekday: 'long', day: 'numeric', month: 'long' };
-    dateElement.textContent = today.toLocaleDateString('es-ES', options);
+// ========================================================
+// SISTEMA ESTACIONAL SEGÚN EL CALENDARIO
+// ========================================================
+function setupSeasonSystem() {
+  const savedSetting = localStorage.getItem(SEASON_STORAGE_KEY) || 'auto';
+  currentSeasonSetting = savedSetting;
+  updateSeason();
+}
+
+// Determina la estación del año automáticamente según el mes del calendario
+function getAutoSeasonByDate(date = new Date()) {
+  const month = date.getMonth(); // 0 = Enero, 11 = Diciembre
+  // Otoño: Septiembre (8), Octubre (9), Noviembre (10)
+  if (month >= 8 && month <= 10) return 'autumn';
+  // Invierno: Diciembre (11), Enero (0), Febrero (1)
+  if (month === 11 || month === 0 || month === 1) return 'winter';
+  // Primavera: Marzo (2), Abril (3), Mayo (4)
+  if (month >= 2 && month <= 4) return 'spring';
+  // Verano: Junio (5), Julio (6), Agosto (7)
+  return 'summer';
+}
+
+function updateSeason() {
+  if (currentSeasonSetting === 'auto') {
+    activeSeasonKey = getAutoSeasonByDate();
+  } else {
+    activeSeasonKey = currentSeasonSetting;
   }
+
+  const seasonInfo = SEASONS[activeSeasonKey] || SEASONS.autumn;
+
+  // 1. Aplicar al HTML para que el CSS cambie la paleta completa
+  document.documentElement.setAttribute('data-season', activeSeasonKey);
+
+  // 2. Cambiar el color de la barra del navegador de Chrome en Android
+  const metaTheme = document.getElementById('metaThemeColor');
+  if (metaTheme) {
+    metaTheme.setAttribute('content', seasonInfo.themeColor);
+  }
+
+  // 3. Actualizar la pastilla en el encabezado
+  const pillIcon = document.getElementById('seasonPillIcon');
+  const pillText = document.getElementById('seasonPillText');
+  if (pillIcon && pillText) {
+    pillIcon.textContent = seasonInfo.icon;
+    pillText.textContent = currentSeasonSetting === 'auto' 
+      ? `${seasonInfo.name} (Auto)` 
+      : seasonInfo.name;
+  }
+
+  // 4. Actualizar botones del modal
+  document.querySelectorAll('.season-choice-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  const activeBtn = document.getElementById(`season-choice-${activeSeasonKey}`);
+  if (activeBtn) activeBtn.classList.add('active');
+}
+
+function openSeasonModal() {
+  const modal = document.getElementById('modal-season');
+  if (modal) modal.classList.add('open');
+}
+
+function selectSeason(seasonKey) {
+  currentSeasonSetting = seasonKey;
+  localStorage.setItem(SEASON_STORAGE_KEY, seasonKey);
+  updateSeason();
+  closeModal('modal-season');
+  vibratePhone(30);
 }
 
 // ========================================================
@@ -120,11 +213,9 @@ function setupNavigation() {
     button.addEventListener('click', () => {
       const targetTabId = button.getAttribute('data-tab');
 
-      // Actualizar botón activo
       navButtons.forEach(btn => btn.classList.remove('active'));
       button.classList.add('active');
 
-      // Mostrar pestaña activa
       tabContents.forEach(tab => {
         if (tab.id === targetTabId) {
           tab.classList.add('active');
@@ -133,8 +224,7 @@ function setupNavigation() {
         }
       });
 
-      // Vibración sutil al cambiar de pestaña
-      vibratePhone(15);
+      vibratePhone(16);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   });
@@ -160,9 +250,9 @@ function renderCrochet() {
     container.innerHTML = `
       <div class="empty-state">
         <span class="empty-state-icon">🧶</span>
-        <h4>No tienes proyectos de crochet activos</h4>
-        <p>Pulsa en "+ Nuevo Proyecto" para empezar a contar tus vueltas.</p>
-        <button class="btn btn-primary" onclick="openNewProjectModal('crochet')">+ Crear Primer Proyecto</button>
+        <h4>Tu cesto de lanas está esperando</h4>
+        <p>Añade un proyecto para empezar a tejer y llevar la cuenta de tus vueltas.</p>
+        <button class="btn btn-primary" onclick="openNewProjectModal('crochet')">+ Empezar Primer Proyecto</button>
       </div>
     `;
     return;
@@ -173,30 +263,32 @@ function renderCrochet() {
     const target = Number(p.target) || 0;
     const hasTarget = target > 0;
     const percent = hasTarget ? Math.min(100, Math.round((current / target) * 100)) : 0;
+    const isFinished = hasTarget && current >= target;
 
     return `
       <div class="project-card" data-id="${p.id}">
         <div class="card-top-bar">
           <div class="card-title-group">
             <h3>${escapeHtml(p.name)}</h3>
-            <span class="card-subtitle">${hasTarget && current >= target ? '🎉 ¡Meta completada!' : 'En proceso'}</span>
+            <span class="card-subtitle">
+              ${isFinished ? '<span class="badge-complete">✨ ¡Completado!</span>' : 'En tus agujas'}
+            </span>
           </div>
           <div class="card-actions">
             <button class="btn-delete-card" title="Eliminar proyecto" onclick="deleteProject('crochet', '${p.id}')">🗑️</button>
           </div>
         </div>
 
-        <!-- Ficha de materiales -->
         <div class="chips-list">
           ${p.yarn ? `<span class="chip">🧶 ${escapeHtml(p.yarn)}</span>` : ''}
           ${p.color ? `<span class="chip">🎨 ${escapeHtml(p.color)}</span>` : ''}
-          ${p.hook ? `<span class="chip">🪡 Aguja: ${escapeHtml(p.hook)}</span>` : ''}
+          ${p.hook ? `<span class="chip">🪡 Aguja ${escapeHtml(p.hook)}</span>` : ''}
         </div>
 
         <!-- CONTADOR DE VUELTAS GIGANTE -->
         <div class="counter-box">
-          <span class="counter-label">Vueltas Realizadas</span>
-          <div class="counter-number-display" title="Toca para editar directamente" onclick="promptDirectCount('crochet', '${p.id}', ${current})">
+          <span class="counter-label">Vueltas Tejidas</span>
+          <div class="counter-number-display" title="Toca para escribir el número directamente" onclick="promptDirectCount('crochet', '${p.id}', ${current})">
             ${current}
           </div>
 
@@ -211,7 +303,6 @@ function renderCrochet() {
             <div class="counter-goal-info">Sin meta fijada</div>
           `}
 
-          <!-- Botones de toque grande para tejer cómodamente -->
           <div class="counter-main-controls">
             <button class="btn-counter btn-decrement" onclick="updateCrochetCounter('${p.id}', -1)" aria-label="Restar una vuelta">
               − 1
@@ -221,7 +312,6 @@ function renderCrochet() {
             </button>
           </div>
 
-          <!-- Botones secundarios -->
           <div class="counter-sub-controls">
             <button class="btn-counter-small" onclick="updateCrochetCounter('${p.id}', 5)">+5</button>
             <button class="btn-counter-small" onclick="updateCrochetCounter('${p.id}', 10)">+10</button>
@@ -233,10 +323,10 @@ function renderCrochet() {
         <!-- NOTAS DEL PATRÓN -->
         <div class="notes-section">
           <div class="notes-label">
-            <span>📝 Notas y Patrón</span>
+            <span>📝 Notas del Patrón</span>
             <small style="opacity:0.6;">(Auto-guardado)</small>
           </div>
-          <textarea class="notes-textarea" placeholder="Apunta tus notas aquí..." 
+          <textarea class="notes-textarea" placeholder="Apunta tus notas de puntos, vueltas o cambios de ovillo..." 
             onchange="updateNotes('crochet', '${p.id}', this.value)"
             oninput="debouncedNotes('crochet', '${p.id}', this.value)">${escapeHtml(p.notes || '')}</textarea>
         </div>
@@ -252,17 +342,17 @@ function updateCrochetCounter(id, delta) {
   const newVal = Math.max(0, (Number(project.current) || 0) + delta);
   project.current = newVal;
   saveData();
-  vibratePhone(delta > 0 ? 30 : 20);
+  vibratePhone(delta > 0 ? 30 : 18);
   renderCrochet();
 }
 
 function resetCrochetCounter(id) {
-  if (confirm('¿Deseas reiniciar el contador de vueltas a cero?')) {
+  if (confirm('¿Deseas reiniciar el contador a cero vueltas?')) {
     const project = appData.crochet.find(p => p.id === id);
     if (project) {
       project.current = 0;
       saveData();
-      vibratePhone(50);
+      vibratePhone(45);
       renderCrochet();
     }
   }
@@ -272,7 +362,7 @@ function setCrochetTarget(id) {
   const project = appData.crochet.find(p => p.id === id);
   if (!project) return;
   const currentTarget = project.target || '';
-  const newTarget = prompt('Introduce la meta total de vueltas (o deja vacío para quitar la meta):', currentTarget);
+  const newTarget = prompt('Escribe el total de vueltas de tu meta (o deja vacío para quitar la meta):', currentTarget);
   if (newTarget !== null) {
     project.target = newTarget.trim() === '' ? 0 : Math.max(0, parseInt(newTarget, 10) || 0);
     saveData();
@@ -305,8 +395,8 @@ function renderDiamond() {
     container.innerHTML = `
       <div class="empty-state">
         <span class="empty-state-icon">💎</span>
-        <h4>No tienes lienzos de diamantes en curso</h4>
-        <p>Añade un cuadro para controlar tus avances y colores pendientes.</p>
+        <h4>Tu mesa de diamantes está despejada</h4>
+        <p>Añade tu cuadro en curso para organizar tus diamantes y registrar tu avance.</p>
         <button class="btn btn-primary" onclick="openNewProjectModal('diamond')">+ Añadir Primer Cuadro</button>
       </div>
     `;
@@ -315,13 +405,16 @@ function renderDiamond() {
 
   container.innerHTML = appData.diamond.map(p => {
     const progress = Math.min(100, Math.max(0, Number(p.progress) || 0));
+    const isFinished = progress === 100;
 
     return `
       <div class="project-card" data-id="${p.id}">
         <div class="card-top-bar">
           <div class="card-title-group">
             <h3>${escapeHtml(p.name)}</h3>
-            <span class="card-subtitle">${progress === 100 ? '✨ ¡Completado!' : 'En proceso'}</span>
+            <span class="card-subtitle">
+              ${isFinished ? '<span class="badge-complete">💎 ¡Terminado con brillo!</span>' : 'Lienzo en curso'}
+            </span>
           </div>
           <div class="card-actions">
             <button class="btn-delete-card" title="Eliminar cuadro" onclick="deleteProject('diamond', '${p.id}')">🗑️</button>
@@ -329,11 +422,11 @@ function renderDiamond() {
         </div>
 
         <div class="chips-list">
-          ${p.size ? `<span class="chip">📏 ${escapeHtml(p.size)}</span>` : ''}
-          <span class="chip">💎 ${progress}% completado</span>
+          ${p.size ? `<span class="chip">📏 Medidas: ${escapeHtml(p.size)}</span>` : ''}
+          <span class="chip">✨ ${progress}% colocado</span>
         </div>
 
-        <!-- CONTROL DE PROGRESO CON BARRA Y DESLIZADOR -->
+        <!-- CONTROL DE PROGRESO CON DESLIZADOR -->
         <div class="diamond-slider-box">
           <div class="progress-header">
             <span>Progreso del lienzo:</span>
@@ -344,12 +437,10 @@ function renderDiamond() {
             <div class="progress-fill fill-diamond" style="width: ${progress}%;"></div>
           </div>
 
-          <!-- Deslizador táctil suave -->
           <input type="range" class="range-slider" min="0" max="100" value="${progress}"
             oninput="handleDiamondSliderInput('${p.id}', this.value)"
             onchange="handleDiamondSliderChange('${p.id}', this.value)">
 
-          <!-- Botones de incremento rápido -->
           <div class="diamond-quick-buttons">
             <button class="btn-diamond-step" onclick="updateDiamondProgress('${p.id}', -5)">-5%</button>
             <button class="btn-diamond-step" onclick="updateDiamondProgress('${p.id}', 5)">+5%</button>
@@ -358,10 +449,10 @@ function renderDiamond() {
           </div>
         </div>
 
-        <!-- CÓDIGOS DE DIAMANTES Y COLORES PENDIENTES -->
+        <!-- CÓDIGOS DMC Y DIAMANTES PENDIENTES -->
         <div class="drill-codes-box">
-          <div class="drill-codes-label">🎨 Códigos de diamantes / Colores pendientes:</div>
-          <textarea class="drill-codes-input" rows="2" placeholder="Apunta DMC, números de bolsita o pendientes..."
+          <div class="drill-codes-label">🎨 Códigos DMC y colores pendientes:</div>
+          <textarea class="drill-codes-input" rows="2" placeholder="Apunta números DMC, bolsitas que faltan..."
             onchange="updateDiamondCodes('${p.id}', this.value)"
             oninput="debouncedDiamondCodes('${p.id}', this.value)">${escapeHtml(p.codes || '')}</textarea>
         </div>
@@ -369,10 +460,10 @@ function renderDiamond() {
         <!-- NOTAS ADICIONALES -->
         <div class="notes-section">
           <div class="notes-label">
-            <span>📝 Notas del cuadro</span>
+            <span>📝 Notas del Cuadro</span>
             <small style="opacity:0.6;">(Auto-guardado)</small>
           </div>
-          <textarea class="notes-textarea" placeholder="Observaciones, tipo de cera o herramientas..." 
+          <textarea class="notes-textarea" placeholder="Tipo de diamantes, técnica o detalles especiales..." 
             onchange="updateNotes('diamond', '${p.id}', this.value)"
             oninput="debouncedNotes('diamond', '${p.id}', this.value)">${escapeHtml(p.notes || '')}</textarea>
         </div>
@@ -385,7 +476,6 @@ function handleDiamondSliderInput(id, val) {
   const p = appData.diamond.find(x => x.id === id);
   if (p) {
     p.progress = parseInt(val, 10);
-    // Actualizar visualmente la barra y el porcentaje sin re-renderizar todo el DOM para máxima suavidad
     const card = document.querySelector(`.project-card[data-id="${id}"]`);
     if (card) {
       const strong = card.querySelector('.progress-header strong');
@@ -411,7 +501,7 @@ function updateDiamondProgress(id, delta) {
   if (!p) return;
   p.progress = Math.min(100, Math.max(0, (Number(p.progress) || 0) + delta));
   saveData();
-  vibratePhone(25);
+  vibratePhone(24);
   renderDiamond();
 }
 
@@ -443,8 +533,8 @@ function renderReading() {
     container.innerHTML = `
       <div class="empty-state">
         <span class="empty-state-icon">📚</span>
-        <h4>No tienes libros registrados</h4>
-        <p>Añade el libro que estás leyendo para ver tu barra de avance.</p>
+        <h4>Tu estantería de lecturas está vacía</h4>
+        <p>Añade tu libro actual para acompañarlo de una taza y ver tus avances.</p>
         <button class="btn btn-primary" onclick="openNewProjectModal('reading')">+ Añadir Primer Libro</button>
       </div>
     `;
@@ -462,7 +552,10 @@ function renderReading() {
         <div class="card-top-bar">
           <div class="card-title-group">
             <h3>${escapeHtml(p.title)}</h3>
-            <span class="card-subtitle">${p.author ? 'de ' + escapeHtml(p.author) : ''} ${isFinished ? '· 🏆 ¡Terminado!' : ''}</span>
+            <span class="card-subtitle">
+              ${p.author ? 'de ' + escapeHtml(p.author) : ''} 
+              ${isFinished ? '· <span class="badge-complete">📖 ¡Leído!</span>' : ''}
+            </span>
           </div>
           <div class="card-actions">
             <button class="btn-delete-card" title="Eliminar libro" onclick="deleteProject('reading', '${p.id}')">🗑️</button>
@@ -480,7 +573,6 @@ function renderReading() {
             <div class="progress-fill fill-reading" style="width: ${percent}%;"></div>
           </div>
 
-          <!-- Controles de avance de páginas -->
           <div class="reading-page-controls">
             <div class="page-input-wrapper">
               <span>Pág:</span>
@@ -497,10 +589,9 @@ function renderReading() {
             </div>
           </div>
 
-          <!-- VALORACIÓN CON ESTRELLAS INTERACTIVAS -->
           <div>
-            <span style="font-size:0.8rem; font-weight:600; color:var(--text-muted);">Tu valoración:</span>
-            <div class="star-rating" title="Toca una estrella para calificar">
+            <span style="font-size:0.82rem; font-weight:700; color:var(--text-muted);">Tu valoración:</span>
+            <div class="star-rating" title="Toca las estrellas para calificar">
               ${[1, 2, 3, 4, 5].map(starNum => `
                 <span class="star ${starNum <= (p.rating || 0) ? 'filled' : ''}" 
                   onclick="setBookRating('${p.id}', ${starNum})">★</span>
@@ -509,10 +600,10 @@ function renderReading() {
           </div>
         </div>
 
-        <!-- CITAS FAVORITAS Y REFLEXIONES -->
+        <!-- CITAS FAVORITAS -->
         <div class="notes-section">
           <div class="notes-label">
-            <span>📖 Citas favoritas o resumen</span>
+            <span>☕ Citas y Reflexiones</span>
             <small style="opacity:0.6;">(Auto-guardado)</small>
           </div>
           <textarea class="notes-textarea" placeholder="Escribe aquí las frases que te conmovieron o apuntes del libro..." 
@@ -547,7 +638,6 @@ function updateReadingPage(id, delta, total) {
 function setBookRating(id, rating) {
   const p = appData.reading.find(x => x.id === id);
   if (!p) return;
-  // Si vuelve a tocar la misma estrella ya marcada, permite desmarcar o reasignar
   p.rating = (p.rating === rating) ? 0 : rating;
   saveData();
   vibratePhone(35);
@@ -606,14 +696,13 @@ function deleteProject(hobby, id) {
 }
 
 // ========================================================
-// MODALES Y FORMULARIOS DE NUEVO PROYECTO
+// MODALES Y FORMULARIOS
 // ========================================================
 function openNewProjectModal(hobby) {
   const modalId = `modal-${hobby}`;
   const modal = document.getElementById(modalId);
   if (modal) {
     modal.classList.add('open');
-    // Enfocar el primer input del formulario
     const firstInput = modal.querySelector('input');
     if (firstInput) setTimeout(() => firstInput.focus(), 100);
   }
@@ -728,7 +817,6 @@ function handleSaveReading(e) {
   vibratePhone(30);
 }
 
-// Selector interactivo de estrellas en el modal de nuevo libro
 function setupStarRatingInput() {
   const container = document.getElementById('new-book-rating');
   const hiddenInput = document.getElementById('reading-rating');
@@ -764,7 +852,7 @@ function resetStarRatingInput() {
 }
 
 // ========================================================
-// COPIA DE SEGURIDAD (EXPORTAR E IMPORTAR JSON)
+// COPIA DE SEGURIDAD
 // ========================================================
 function setupBackupModal() {
   const btn = document.getElementById('btnBackupModal');
@@ -806,16 +894,15 @@ function importDataBackup(event) {
         closeModal('modal-backup');
         alert('¡Copia de seguridad restaurada con éxito!');
       } else {
-        alert('El archivo no contiene un formato válido de Mis Hobbies.');
+        alert('El archivo no contiene un formato válido.');
       }
     } catch (err) {
-      alert('Error al leer el archivo. Asegúrate de que sea un archivo .json válido.');
+      alert('Error al leer el archivo JSON.');
     }
   };
   reader.readAsText(file);
 }
 
-// Función auxiliar para evitar inyecciones HTML
 function escapeHtml(str) {
   if (!str) return '';
   return String(str)
