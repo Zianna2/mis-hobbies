@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Fondo Primavera: Matcha y Pétalo de Rosa -->
+    <linearGradient id="springBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCFAF7"/>
+      <stop offset="50%" stop-color="#F2F7EE"/>
+      <stop offset="100%" stop-color="#DFEBD8"/>
+    </linearGradient>
+
+    <!-- Pétalos Rosa Flor de Cerezo -->
+    <linearGradient id="sakuraPetal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFD6DE"/>
+      <stop offset="60%" stop-color="#F7A8B8"/>
+      <stop offset="100%" stop-color="#E26D85"/>
+    </linearGradient>
+
+    <linearGradient id="springLeaf" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#A7C957"/>
+      <stop offset="100%" stop-color="#588157"/>
+    </linearGradient>
+
+    <filter id="softSpringShadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#46603E" flood-opacity="0.16"/>
+    </filter>
+  </defs>
+
+  <rect width="512" height="512" rx="128" fill="url(#springBgGrad)"/>
+  <circle cx="256" cy="256" r="200" fill="#FAFDF8" stroke="#CFDFC8" stroke-width="5" filter="url(#softSpringShadow)"/>
+  <circle cx="256" cy="256" r="188" fill="none" stroke="#E1EFE0" stroke-width="2" stroke-dasharray="6 6"/>
+
+  <!-- Hojas verdes en la base -->
+  <g transform="translate(256, 310)">
+    <path d="M 0,0 C -70,20 -110,-40 -50,-60 C -10,-40 0,0 0,0 Z" fill="url(#springLeaf)"/>
+    <path d="M 0,0 C 70,20 110,-40 50,-60 C 10,-40 0,0 0,0 Z" fill="url(#springLeaf)"/>
+    <!-- Tallo suave -->
+    <path d="M 0,0 Q 10,60 0,90" stroke="#588157" stroke-width="9" stroke-linecap="round" fill="none"/>
+  </g>
+
+  <!-- Gran Flor de Cerezo / Peonía en Flor -->
+  <g transform="translate(256, 230)">
+    <!-- 5 Pétalos elegantes -->
+    <g transform="rotate(0)">
+      <path d="M 0,0 C -36,-40 -50,-90 0,-105 C 50,-90 36,-40 0,0 Z" fill="url(#sakuraPetal)"/>
+    </g>
+    <g transform="rotate(72)">
+      <path d="M 0,0 C -36,-40 -50,-90 0,-105 C 50,-90 36,-40 0,0 Z" fill="url(#sakuraPetal)"/>
+    </g>
+    <g transform="rotate(144)">
+      <path d="M 0,0 C -36,-40 -50,-90 0,-105 C 50,-90 36,-40 0,0 Z" fill="url(#sakuraPetal)"/>
+    </g>
+    <g transform="rotate(216)">
+      <path d="M 0,0 C -36,-40 -50,-90 0,-105 C 50,-90 36,-40 0,0 Z" fill="url(#sakuraPetal)"/>
+    </g>
+    <g transform="rotate(288)">
+      <path d="M 0,0 C -36,-40 -50,-90 0,-105 C 50,-90 36,-40 0,0 Z" fill="url(#sakuraPetal)"/>
+    </g>
+
+    <!-- Corola central dorada y pistilos -->
+    <circle cx="0" cy="0" r="28" fill="#FCEADE" stroke="#F4A261" stroke-width="4"/>
+    <circle cx="0" cy="0" r="16" fill="#E76F51"/>
+    
+    <!-- Gotitas de polen y destellos -->
+    <circle cx="-12" cy="-12" r="3.5" fill="#F4A261"/>
+    <circle cx="12" cy="-12" r="3.5" fill="#F4A261"/>
+    <circle cx="-12" cy="12" r="3.5" fill="#F4A261"/>
+    <circle cx="12" cy="12" r="3.5" fill="#F4A261"/>
+  </g>
+
+  <!-- Pequeñas mariposas o pétalos al viento -->
+  <g fill="#F7A8B8" opacity="0.8">
+    <ellipse cx="140" cy="160" rx="10" ry="6" transform="rotate(-30 140 160)"/>
+    <ellipse cx="370" cy="180" rx="12" ry="7" transform="rotate(25 370 180)"/>
+  </g>
+</svg>
