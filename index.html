@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <!-- Configuración esencial para móviles: evita zooms molestos y ajusta a toda la pantalla -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Mis Hobbies - Registro Personal</title>
+
+  <!-- PWA Meta Tags para que Android y Xiaomi lo reconozcan como app -->
+  <meta name="theme-color" content="#FAF7F2">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Mis Hobbies">
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Iconos para la app -->
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon-192.png">
+
+  <!-- Estilos visuales -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ENCABEZADO DE LA APP -->
+  <header class="app-header">
+    <div class="header-content">
+      <div class="brand">
+        <span class="brand-icon">✨</span>
+        <div>
+          <h1 class="brand-title">Mis Hobbies</h1>
+          <p class="brand-subtitle" id="currentDate">Tu rincón creativo</p>
+        </div>
+      </div>
+      <button id="btnBackupModal" class="btn-icon" title="Copia de seguridad y ajustes" aria-label="Ajustes y copia">
+        💾
+      </button>
+    </div>
+  </header>
+
+  <!-- CONTENEDOR PRINCIPAL DE PESTAÑAS -->
+  <main class="app-main">
+    
+    <!-- PESTAÑA 1: CROCHET / TEJER -->
+    <section id="tab-crochet" class="tab-content active">
+      <div class="section-banner crochet-theme">
+        <div class="banner-text">
+          <h2>Tejer & Ganchillo 🧶</h2>
+          <p>Lleva la cuenta exacta de tus vueltas y patrones</p>
+        </div>
+        <button class="btn btn-primary" onclick="openNewProjectModal('crochet')">
+          + Nuevo Proyecto
+        </button>
+      </div>
+
+      <div id="crochet-list" class="cards-container">
+        <!-- Las tarjetas se generan dinámicamente con JavaScript -->
+      </div>
+    </section>
+
+    <!-- PESTAÑA 2: DIAMOND PAINTING -->
+    <section id="tab-diamond" class="tab-content">
+      <div class="section-banner diamond-theme">
+        <div class="banner-text">
+          <h2>Pintura de Diamantes 💎</h2>
+          <p>Organiza tus lienzos, avances y códigos de color</p>
+        </div>
+        <button class="btn btn-primary" onclick="openNewProjectModal('diamond')">
+          + Nuevo Cuadro
+        </button>
+      </div>
+
+      <div id="diamond-list" class="cards-container">
+        <!-- Las tarjetas se generan dinámicamente con JavaScript -->
+      </div>
+    </section>
+
+    <!-- PESTAÑA 3: LECTURA -->
+    <section id="tab-reading" class="tab-content">
+      <div class="section-banner reading-theme">
+        <div class="banner-text">
+          <h2>Lectura & Libros 📚</h2>
+          <p>Tus páginas leídas, valoraciones y citas favoritas</p>
+        </div>
+        <button class="btn btn-primary" onclick="openNewProjectModal('reading')">
+          + Nuevo Libro
+        </button>
+      </div>
+
+      <div id="reading-list" class="cards-container">
+        <!-- Las tarjetas se generan dinámicamente con JavaScript -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- BARRA DE NAVEGACIÓN INFERIOR (Estilo App Móvil Nativa) -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-tab="tab-crochet">
+      <span class="nav-icon">🧶</span>
+      <span class="nav-label">Crochet</span>
+    </button>
+    <button class="nav-item" data-tab="tab-diamond">
+      <span class="nav-icon">💎</span>
+      <span class="nav-label">Diamantes</span>
+    </button>
+    <button class="nav-item" data-tab="tab-reading">
+      <span class="nav-icon">📚</span>
+      <span class="nav-label">Lectura</span>
+    </button>
+  </nav>
+
+  <!-- ========================================== -->
+  <!-- MODALES FLOTANTES PARA AÑADIR PROYECTOS    -->
+  <!-- ========================================== -->
+
+  <!-- Modal: Nuevo Proyecto Crochet -->
+  <div id="modal-crochet" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>🧶 Nuevo Proyecto de Crochet</h3>
+        <button class="modal-close" onclick="closeModal('modal-crochet')">&times;</button>
+      </div>
+      <form id="form-crochet" onsubmit="handleSaveCrochet(event)">
+        <div class="form-group">
+          <label for="crochet-name">Nombre del proyecto *</label>
+          <input type="text" id="crochet-name" placeholder="Ej: Bufanda de invierno, Amigurumi oso" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="crochet-yarn">Tipo de lana / hilo</label>
+            <input type="text" id="crochet-yarn" placeholder="Ej: Lana Merino, Algodón">
+          </div>
+          <div class="form-group">
+            <label for="crochet-color">Color</label>
+            <input type="text" id="crochet-color" placeholder="Ej: Mostaza, Rosa empolvado">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="crochet-hook">Grosor de aguja</label>
+            <input type="text" id="crochet-hook" placeholder="Ej: 4.5 mm, 5.0 mm">
+          </div>
+          <div class="form-group">
+            <label for="crochet-target">Meta de vueltas (opcional)</label>
+            <input type="number" id="crochet-target" min="0" placeholder="Ej: 100">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="crochet-notes">Notas o patrón</label>
+          <textarea id="crochet-notes" rows="3" placeholder="Puntos a usar, instrucciones clave o recordatorios..."></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-crochet')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Proyecto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Nuevo Cuadro Diamantes -->
+  <div id="modal-diamond" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>💎 Nuevo Cuadro de Diamantes</h3>
+        <button class="modal-close" onclick="closeModal('modal-diamond')">&times;</button>
+      </div>
+      <form id="form-diamond" onsubmit="handleSaveDiamond(event)">
+        <div class="form-group">
+          <label for="diamond-name">Nombre o temática del lienzo *</label>
+          <input type="text" id="diamond-name" placeholder="Ej: Paisaje de bosque, Gato mandala" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="diamond-size">Medidas (cm)</label>
+            <input type="text" id="diamond-size" placeholder="Ej: 40x50 cm, 30x40 cm">
+          </div>
+          <div class="form-group">
+            <label for="diamond-initial-progress">Progreso inicial (%)</label>
+            <input type="number" id="diamond-initial-progress" min="0" max="100" value="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="diamond-codes">Códigos de diamantes / Colores pendientes</label>
+          <textarea id="diamond-codes" rows="2" placeholder="Ej: Faltan DMC 310 y DMC 823; pedir bolsitas extra..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="diamond-notes">Notas adicionales</label>
+          <textarea id="diamond-notes" rows="2" placeholder="Tipo de diamante (redondo/cuadrado), tienda..."></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-diamond')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Cuadro</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Nuevo Libro -->
+  <div id="modal-reading" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>📚 Nuevo Libro</h3>
+        <button class="modal-close" onclick="closeModal('modal-reading')">&times;</button>
+      </div>
+      <form id="form-reading" onsubmit="handleSaveReading(event)">
+        <div class="form-group">
+          <label for="reading-title">Título del libro *</label>
+          <input type="text" id="reading-title" placeholder="Ej: La sombra del viento" required>
+        </div>
+        <div class="form-group">
+          <label for="reading-author">Autor / Autora</label>
+          <input type="text" id="reading-author" placeholder="Ej: Carlos Ruiz Zafón">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="reading-current-page">Página actual</label>
+            <input type="number" id="reading-current-page" min="0" value="0">
+          </div>
+          <div class="form-group">
+            <label for="reading-total-pages">Total de páginas *</label>
+            <input type="number" id="reading-total-pages" min="1" placeholder="Ej: 480" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Valoración inicial</label>
+          <div class="star-rating-input" id="new-book-rating">
+            <span class="star-input" data-value="1">★</span>
+            <span class="star-input" data-value="2">★</span>
+            <span class="star-input" data-value="3">★</span>
+            <span class="star-input" data-value="4">★</span>
+            <span class="star-input" data-value="5">★</span>
+          </div>
+          <input type="hidden" id="reading-rating" value="0">
+        </div>
+        <div class="form-group">
+          <label for="reading-quotes">Citas favoritas o reflexiones</label>
+          <textarea id="reading-quotes" rows="3" placeholder="Apunta frases que te hayan gustado o un resumen..."></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-reading')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Libro</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Copia de Seguridad y Datos -->
+  <div id="modal-backup" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>💾 Copia de Seguridad</h3>
+        <button class="modal-close" onclick="closeModal('modal-backup')">&times;</button>
+      </div>
+      <p class="modal-description">
+        Todos tus proyectos se guardan automáticamente en tu móvil. Si quieres cambiar de teléfono o tener una copia a salvo, puedes descargarla aquí.
+      </p>
+
+      <div class="backup-actions">
+        <button class="btn btn-primary btn-block" onclick="exportDataBackup()">
+          ⬇️ Descargar Copia de Mis Hobbies (JSON)
+        </button>
+
+        <label class="btn btn-secondary btn-block file-upload-label">
+          ⬆️ Restaurar Copia desde Archivo
+          <input type="file" id="backupFileInput" accept=".json" onchange="importDataBackup(event)" style="display:none;">
+        </label>
+      </div>
+
+      <div class="app-version-info">
+        <p><strong>Mis Hobbies PWA</strong> · Versión 1.0</p>
+        <p>Funciona 100% sin conexión a internet.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script principal de la aplicación -->
+  <script src="app.js"></script>
+
+  <!-- Registro del Service Worker para funcionamiento PWA -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then((reg) => console.log('Service Worker registrado con éxito:', reg.scope))
+          .catch((err) => console.log('Error registrando Service Worker:', err));
+      });
+    }
+  </script>
+</body>
+</html>
