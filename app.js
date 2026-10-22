@@ -1,4 +1,4 @@
-// ========================================================
+﻿// ========================================================
 // MIS HOBBIES - LÓGICA COZY & ADAPTACIÓN ESTACIONAL
 // ========================================================
 
@@ -10,30 +10,34 @@ const SEASONS = {
   autumn: {
     id: 'autumn',
     name: 'Otoño Cálido',
-    icon: '🍂',
-    themeColor: '#FAF5ED',
-    desc: 'Canela & Miel'
+    icon: '🍄',
+    iconFile: 'icon-autumn.svg',
+    themeColor: '#F5EFEB',
+    desc: 'Marrón Claro, Seta & Canela'
   },
   winter: {
     id: 'winter',
     name: 'Invierno Cozy',
     icon: '❄️',
-    themeColor: '#F4F6F9',
+    iconFile: 'icon-winter.svg',
+    themeColor: '#F1F4F8',
     desc: 'Chocolate & Nieve'
   },
   spring: {
     id: 'spring',
     name: 'Primavera Dulce',
     icon: '🌸',
-    themeColor: '#FAF7F4',
+    iconFile: 'icon-spring.svg',
+    themeColor: '#F4F7F2',
     desc: 'Matcha & Flores'
   },
   summer: {
     id: 'summer',
-    name: 'Verano Serena',
-    icon: '☀️',
-    themeColor: '#FFFDF9',
-    desc: 'Melocotón & Sol'
+    name: 'Verano Soleado',
+    icon: '🌻',
+    iconFile: 'icon-summer.svg',
+    themeColor: '#FCF8F0',
+    desc: 'Girasol & Sol Dorado'
   }
 };
 
@@ -44,7 +48,8 @@ let activeSeasonKey = 'autumn';
 let appData = {
   crochet: [],
   diamond: [],
-  reading: []
+  reading: [],
+  plants: []
 };
 
 // Datos iniciales de ejemplo acogedores
@@ -80,6 +85,47 @@ const initialSampleData = {
       totalPages: 330,
       rating: 5,
       quotes: '«Nunca subestimes la gran importancia de las cosas pequeñas». Una lectura preciosa para una tarde tranquila.'
+    }
+  ],
+  plants: [
+    {
+      id: 'sample-plant-1',
+      name: 'Monstera Deliciosa',
+      variety: 'Costilla de Adán',
+      location: 'Salón junto a la ventana',
+      light: 'Luz indirecta brillante',
+      waterFrequency: 7,
+      lastWatered: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      fertilizeFrequency: 30,
+      lastFertilized: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+      icon: '🪴',
+      notes: 'Limpiar el polvo de las hojas con un paño húmedo. Regar cuando el sustrato superior esté seco al tacto.'
+    },
+    {
+      id: 'sample-plant-2',
+      name: 'Pothos Dorado',
+      variety: 'Epipremnum aureum',
+      location: 'Estantería de lecturas',
+      light: 'Semisombra',
+      waterFrequency: 5,
+      lastWatered: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // ¡Toca regar hoy!
+      fertilizeFrequency: 30,
+      lastFertilized: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
+      icon: '🌿',
+      notes: 'Planta muy agradecida y resistente. Crece con preciosas guías colgantes.'
+    },
+    {
+      id: 'sample-plant-3',
+      name: 'Ficus Lyrata',
+      variety: 'Higuera de hoja de violín',
+      location: 'Rincón de tejer',
+      light: 'Luz brillante sin sol directo',
+      waterFrequency: 10,
+      lastWatered: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+      fertilizeFrequency: 30,
+      lastFertilized: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+      icon: '🪴',
+      notes: 'Evitar corrientes de aire frío y no moverla con frecuencia.'
     }
   ]
 };
@@ -207,6 +253,7 @@ function loadData() {
       if (!Array.isArray(appData.crochet)) appData.crochet = [];
       if (!Array.isArray(appData.diamond)) appData.diamond = [];
       if (!Array.isArray(appData.reading)) appData.reading = [];
+      if (!Array.isArray(appData.plants)) appData.plants = JSON.parse(JSON.stringify(initialSampleData.plants));
     } catch (e) {
       console.error('Error al leer datos:', e);
       appData = JSON.parse(JSON.stringify(initialSampleData));
@@ -272,12 +319,57 @@ function updateSeason() {
       : seasonInfo.name;
   }
 
-  // 4. Actualizar botones del modal
+  // 4. Actualizar el icono exterior (favicon, apple-touch-icon y cabecera)
+  updateAppSeasonalIcons(seasonInfo);
+
+  // 5. Actualizar botones del modal
   document.querySelectorAll('.season-choice-btn').forEach(btn => {
     btn.classList.remove('active');
   });
   const activeBtn = document.getElementById(`season-choice-${activeSeasonKey}`);
   if (activeBtn) activeBtn.classList.add('active');
+}
+
+function updateAppSeasonalIcons(seasonInfo) {
+  // A. Actualizar icono del encabezado de la app
+  const brandIcon = document.getElementById('appBrandIcon');
+  if (brandIcon) {
+    brandIcon.src = seasonInfo.iconFile;
+    brandIcon.alt = `Icono ${seasonInfo.name}`;
+  }
+
+  // B. Actualizar favicon dinámico en el navegador
+  const favicon = document.getElementById('dynamicFavicon');
+  if (favicon) {
+    favicon.href = seasonInfo.iconFile;
+  }
+
+  const appleIcon = document.getElementById('dynamicAppleIcon');
+  if (appleIcon) {
+    appleIcon.href = seasonInfo.iconFile;
+  }
+
+  // C. Renderizado dinámico a canvas para generar PNG de alta compatibilidad para Android/iOS
+  try {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 192;
+      canvas.height = 192;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.clearRect(0, 0, 192, 192);
+        ctx.drawImage(img, 0, 0, 192, 192);
+        const dataUrl = canvas.toDataURL('image/png');
+        if (favicon) favicon.href = dataUrl;
+        if (appleIcon) appleIcon.href = dataUrl;
+      }
+    };
+    img.src = seasonInfo.iconFile;
+  } catch (err) {
+    // Ignorar si canvas no está disponible
+  }
 }
 
 function openSeasonModal() {
@@ -328,6 +420,9 @@ function renderAll() {
   renderCrochet();
   renderDiamond();
   renderReading();
+  renderPlants();
+  renderNatureHub();
+  updateDailyNaturePreviews();
 }
 
 // ========================================================
@@ -736,6 +831,663 @@ function setBookRating(id, rating) {
 }
 
 // ========================================================
+// 4. SECCIÓN CUIDADO DE MIS PLANTAS (🪴)
+// ========================================================
+let currentPlantFilter = 'all';
+
+function renderPlants() {
+  const container = document.getElementById('plants-list');
+  if (!container) return;
+
+  if (!Array.isArray(appData.plants)) appData.plants = [];
+
+  // Calcular estadísticas para los contadores superiores
+  const now = Date.now();
+  let countWaterNeeded = 0;
+  let countOk = 0;
+
+  appData.plants.forEach(p => {
+    const daysSinceWatered = Math.max(0, Math.floor((now - new Date(p.lastWatered).getTime()) / (1000 * 60 * 60 * 24)));
+    const freq = Math.max(1, parseInt(p.waterFrequency, 10) || 7);
+    const daysRemaining = freq - daysSinceWatered;
+    if (daysRemaining <= 0) {
+      countWaterNeeded++;
+    } else {
+      countOk++;
+    }
+  });
+
+  const statTotal = document.getElementById('stat-total-plants');
+  const statWater = document.getElementById('stat-water-plants');
+  const statOk = document.getElementById('stat-ok-plants');
+
+  if (statTotal) statTotal.textContent = appData.plants.length;
+  if (statWater) statWater.textContent = countWaterNeeded;
+  if (statOk) statOk.textContent = countOk;
+
+  // Filtrado
+  let filteredPlants = appData.plants;
+  if (currentPlantFilter === 'water') {
+    filteredPlants = appData.plants.filter(p => {
+      const daysSinceWatered = Math.max(0, Math.floor((now - new Date(p.lastWatered).getTime()) / (1000 * 60 * 60 * 24)));
+      const freq = Math.max(1, parseInt(p.waterFrequency, 10) || 7);
+      return (freq - daysSinceWatered) <= 0;
+    });
+  } else if (currentPlantFilter === 'fertilize') {
+    filteredPlants = appData.plants.filter(p => {
+      if (!p.lastFertilized) return true;
+      const daysSince = Math.max(0, Math.floor((now - new Date(p.lastFertilized).getTime()) / (1000 * 60 * 60 * 24)));
+      return daysSince >= (p.fertilizeFrequency || 30);
+    });
+  } else if (currentPlantFilter === 'ok') {
+    filteredPlants = appData.plants.filter(p => {
+      const daysSinceWatered = Math.max(0, Math.floor((now - new Date(p.lastWatered).getTime()) / (1000 * 60 * 60 * 24)));
+      const freq = Math.max(1, parseInt(p.waterFrequency, 10) || 7);
+      return (freq - daysSinceWatered) > 0;
+    });
+  }
+
+  if (filteredPlants.length === 0) {
+    if (appData.plants.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <span class="empty-state-icon">🪴</span>
+          <h4>Tu jardín interior está por florecer</h4>
+          <p>Añade tus plantas para no olvidar cuándo regarlas ni abonarlas.</p>
+          <button class="btn btn-primary" onclick="openNewPlantModal()">+ Añadir Primera Planta</button>
+        </div>
+      `;
+    } else {
+      container.innerHTML = `
+        <div class="empty-state" style="padding: 28px 18px;">
+          <span class="empty-state-icon">✨</span>
+          <h4>¡No hay plantas en esta categoría!</h4>
+          <p>Todas tus plantas están en orden o no coinciden con este filtro.</p>
+          <button class="btn btn-secondary" onclick="filterPlants('all', document.querySelector('.plants-filter-bar button'))">Ver todas las plantas</button>
+        </div>
+      `;
+    }
+    return;
+  }
+
+  container.innerHTML = filteredPlants.map(p => {
+    const daysSinceWatered = Math.max(0, Math.floor((now - new Date(p.lastWatered).getTime()) / (1000 * 60 * 60 * 24)));
+    const freq = Math.max(1, parseInt(p.waterFrequency, 10) || 7);
+    const daysRemaining = freq - daysSinceWatered;
+
+    // Hidratación en porcentaje (100% recién regada, 0% o negativo necesita agua)
+    const hydrationPct = Math.max(0, Math.min(100, Math.round(((freq - daysSinceWatered) / freq) * 100)));
+    let barClass = '';
+    if (hydrationPct <= 25) barClass = 'danger';
+    else if (hydrationPct <= 50) barClass = 'warning';
+
+    // Badge y texto de estado de riego
+    let statusBadge = '';
+    let statusText = '';
+    if (daysRemaining < 0) {
+      const daysLate = Math.abs(daysRemaining);
+      statusBadge = `<span class="badge-water-late">🚨 Riego atrasado (${daysLate}d)</span>`;
+      statusText = `¡Atrasado ${daysLate} ${daysLate === 1 ? 'día' : 'días'}!`;
+    } else if (daysRemaining === 0) {
+      statusBadge = `<span class="badge-water-needed">💧 ¡Toca regar hoy!</span>`;
+      statusText = 'El sustrato ya pide agua hoy.';
+    } else if (daysSinceWatered === 0) {
+      statusBadge = `<span class="badge-water-ok">✨ Regada hoy</span>`;
+      statusText = `Próximo riego en ${daysRemaining} ${daysRemaining === 1 ? 'día' : 'días'}.`;
+    } else {
+      statusBadge = `<span class="badge-water-ok">🌿 En fecha</span>`;
+      statusText = `Próximo riego en ${daysRemaining} ${daysRemaining === 1 ? 'día' : 'días'}.`;
+    }
+
+    // Texto de último riego
+    let lastWateredText = 'Hoy';
+    if (daysSinceWatered === 1) lastWateredText = 'Ayer';
+    else if (daysSinceWatered > 1) lastWateredText = `Hace ${daysSinceWatered} días`;
+
+    // Estado del abono
+    const fertilizeFreq = p.fertilizeFrequency || 30;
+    const daysSinceFertilized = p.lastFertilized 
+      ? Math.max(0, Math.floor((now - new Date(p.lastFertilized).getTime()) / (1000 * 60 * 60 * 24)))
+      : 999;
+    const needsFertilizer = daysSinceFertilized >= fertilizeFreq;
+    let fertilizeText = '';
+    if (daysSinceFertilized === 0) fertilizeText = 'Abonada hoy ✨';
+    else if (daysSinceFertilized > 365) fertilizeText = 'Sin abonar aún';
+    else fertilizeText = `Hace ${daysSinceFertilized}d (cada ${fertilizeFreq}d)`;
+
+    return `
+      <div class="plant-card" data-id="${p.id}">
+        <div class="card-top-bar" style="margin-bottom:8px;">
+          <div class="plant-card-header" style="margin-bottom:0; flex:1;">
+            <div class="plant-avatar">
+              ${escapeHtml(p.icon || '🪴')}
+            </div>
+            <div class="plant-title-info">
+              <h3 class="plant-name">${escapeHtml(p.name)}</h3>
+              ${p.variety ? `<div class="plant-variety">${escapeHtml(p.variety)}</div>` : ''}
+              <div class="plant-tags">
+                ${p.location ? `<span class="plant-tag">📍 ${escapeHtml(p.location)}</span>` : ''}
+                ${p.light ? `<span class="plant-tag">☀️ ${escapeHtml(p.light)}</span>` : ''}
+                <span class="plant-tag">💧 Cada ${freq} días</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-actions">
+            <button class="btn-delete-card" title="Editar cuidados" onclick="editPlant('${p.id}')">✏️</button>
+            <button class="btn-delete-card" title="Eliminar planta" onclick="deletePlant('${p.id}')">🗑️</button>
+          </div>
+        </div>
+
+        <!-- Caja de hidratación y riego -->
+        <div class="water-status-box">
+          <div class="water-status-header">
+            <span class="water-status-title">💧 Nivel de Hidratación</span>
+            ${statusBadge}
+          </div>
+
+          <div class="hydration-bar-container">
+            <div class="hydration-bar-track">
+              <div class="hydration-bar-fill ${barClass}" style="width: ${hydrationPct}%;"></div>
+            </div>
+          </div>
+
+          <div class="water-dates-grid">
+            <span>Último riego: <strong>${lastWateredText}</strong></span>
+            <span><strong>${statusText}</strong></span>
+          </div>
+
+          <!-- Información de abono -->
+          <div class="fertilize-info-line">
+            <span>🌿 Abono: <strong>${fertilizeText}</strong></span>
+            ${needsFertilizer ? '<span style="color:#C05621; font-weight:700; font-size:0.75rem;">¡Toca abonar!</span>' : '<span style="color:#276749; font-weight:700; font-size:0.75rem;">Al día</span>'}
+          </div>
+        </div>
+
+        <!-- Botones táctiles de acción rápida -->
+        <div class="plant-actions-row">
+          <button class="btn-plant-action btn-water" onclick="waterPlant('${p.id}')" title="Registrar que has regado esta planta hoy">
+            💧 Regada Hoy
+          </button>
+          <button class="btn-plant-action btn-fertilize" onclick="fertilizePlant('${p.id}')" title="Registrar abono aplicado hoy">
+            🌿 Abonada Hoy
+          </button>
+        </div>
+
+        <!-- Notas de cuidados de la planta -->
+        <div class="notes-section" style="margin-top:14px;">
+          <div class="notes-label">
+            <span>📝 Cuidados & Notas</span>
+            <small style="opacity:0.6;">(Auto-guardado)</small>
+          </div>
+          <textarea class="notes-textarea" style="min-height:55px;" placeholder="Tierra, humedad, poda, transplante..." 
+            onchange="updatePlantNotes('${p.id}', this.value)"
+            oninput="debouncedPlantNotes('${p.id}', this.value)">${escapeHtml(p.notes || '')}</textarea>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function debouncedPlantNotes(id, text) {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    updatePlantNotes(id, text);
+  }, 400);
+}
+
+function updatePlantNotes(id, text) {
+  if (!Array.isArray(appData.plants)) return;
+  const plant = appData.plants.find(p => p.id === id);
+  if (plant) {
+    plant.notes = text;
+    saveData();
+  }
+}
+
+function waterPlant(id) {
+  const plant = appData.plants.find(p => p.id === id);
+  if (!plant) return;
+  plant.lastWatered = new Date().toISOString();
+  saveData();
+  vibratePhone(40);
+  renderPlants();
+}
+
+function fertilizePlant(id) {
+  const plant = appData.plants.find(p => p.id === id);
+  if (!plant) return;
+  plant.lastFertilized = new Date().toISOString();
+  saveData();
+  vibratePhone(35);
+  renderPlants();
+}
+
+function deletePlant(id) {
+  const plant = appData.plants.find(p => p.id === id);
+  const name = plant ? plant.name : 'esta planta';
+  if (confirm(`¿Estás segura de que quieres eliminar ${name} de tu registro de plantas?`)) {
+    appData.plants = appData.plants.filter(p => p.id !== id);
+    saveData();
+    vibratePhone(35);
+    renderPlants();
+  }
+}
+
+function filterPlants(type, btn) {
+  currentPlantFilter = type;
+  document.querySelectorAll('.plants-filter-bar .filter-pill').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderPlants();
+}
+
+function openNewPlantModal() {
+  document.getElementById('form-plant').reset();
+  document.getElementById('plant-id').value = '';
+  document.getElementById('plant-icon-value').value = '🪴';
+  document.querySelectorAll('.plant-icon-choice').forEach((b, idx) => {
+    if (idx === 0) b.classList.add('active');
+    else b.classList.remove('active');
+  });
+  document.getElementById('btn-save-plant').textContent = 'Guardar Planta';
+  const modal = document.getElementById('modal-plant');
+  if (modal) modal.classList.add('open');
+}
+
+function editPlant(id) {
+  const p = appData.plants.find(x => x.id === id);
+  if (!p) return;
+
+  document.getElementById('plant-id').value = p.id;
+  document.getElementById('plant-name').value = p.name || '';
+  document.getElementById('plant-variety').value = p.variety || '';
+  document.getElementById('plant-location').value = p.location || '';
+  document.getElementById('plant-water-freq').value = p.waterFrequency || 7;
+  document.getElementById('plant-fertilize-freq').value = p.fertilizeFrequency || 30;
+  document.getElementById('plant-light').value = p.light || '';
+  document.getElementById('plant-notes').value = p.notes || '';
+  document.getElementById('plant-icon-value').value = p.icon || '🪴';
+
+  document.querySelectorAll('.plant-icon-choice').forEach(b => {
+    if (b.textContent.includes(p.icon)) b.classList.add('active');
+    else b.classList.remove('active');
+  });
+
+  document.getElementById('btn-save-plant').textContent = 'Actualizar Planta';
+  const modal = document.getElementById('modal-plant');
+  if (modal) modal.classList.add('open');
+}
+
+function handleSavePlant(e) {
+  e.preventDefault();
+  const idInput = document.getElementById('plant-id').value;
+  const name = document.getElementById('plant-name').value.trim();
+  const variety = document.getElementById('plant-variety').value.trim();
+  const location = document.getElementById('plant-location').value.trim();
+  const waterFrequency = Math.max(1, parseInt(document.getElementById('plant-water-freq').value, 10) || 7);
+  const fertilizeFrequency = Math.max(1, parseInt(document.getElementById('plant-fertilize-freq').value, 10) || 30);
+  const light = document.getElementById('plant-light').value.trim();
+  const icon = document.getElementById('plant-icon-value').value || '🪴';
+  const notes = document.getElementById('plant-notes').value.trim();
+
+  if (!name) return;
+
+  if (idInput) {
+    const p = appData.plants.find(x => x.id === idInput);
+    if (p) {
+      p.name = name;
+      p.variety = variety;
+      p.location = location;
+      p.waterFrequency = waterFrequency;
+      p.fertilizeFrequency = fertilizeFrequency;
+      p.light = light;
+      p.icon = icon;
+      p.notes = notes;
+    }
+  } else {
+    const newPlant = {
+      id: 'plant-' + Date.now(),
+      name,
+      variety,
+      location,
+      waterFrequency,
+      lastWatered: new Date().toISOString(),
+      fertilizeFrequency,
+      lastFertilized: new Date().toISOString(),
+      light,
+      icon,
+      notes,
+      createdAt: new Date().toISOString()
+    };
+    if (!Array.isArray(appData.plants)) appData.plants = [];
+    appData.plants.unshift(newPlant);
+  }
+
+  saveData();
+  renderPlants();
+  closeModal('modal-plant');
+  vibratePhone(30);
+}
+
+function setWaterFreqPreset(days) {
+  const input = document.getElementById('plant-water-freq');
+  if (input) input.value = days;
+}
+
+function setFertilizeFreqPreset(days) {
+  const input = document.getElementById('plant-fertilize-freq');
+  if (input) input.value = days;
+}
+
+function selectPlantIcon(icon, btn) {
+  document.getElementById('plant-icon-value').value = icon;
+  document.querySelectorAll('.plant-icon-choice').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
+// ========================================================
+// 5. SECCIÓN DE NATURALEZA Y FAUNA DIARIA (#tab-nature)
+// Planta u Hongo del Día & Animal del Día
+// ========================================================
+let currentNatureSection = 'plant'; // 'plant' o 'animal'
+let natureDayOffset = 0; // 0 = hoy, -1 = ayer, +1 = mañana
+
+function getDayOfYear(date = new Date()) {
+  const start = new Date(date.getFullYear(), 0, 0);
+  const diff = (date - start) + ((start.getTimezoneOffset() - date.getTimezoneOffset()) * 60 * 1000);
+  return Math.floor(diff / (1000 * 60 * 60 * 24));
+}
+
+function renderNatureHub() {
+  const container = document.getElementById('nature-content');
+  if (!container) return;
+
+  if (typeof NATURE_PLANTS_DATA === 'undefined' || typeof NATURE_ANIMALS_DATA === 'undefined') {
+    container.innerHTML = '<p style="text-align:center; padding:20px;">Cargando catálogo natural...</p>';
+    return;
+  }
+
+  const targetDate = new Date(Date.now() + natureDayOffset * 86400000);
+  const dayOfYear = getDayOfYear(targetDate);
+
+  // Selector cíclico según día del año
+  const plantIndex = Math.abs(dayOfYear) % NATURE_PLANTS_DATA.length;
+  const animalIndex = Math.abs(dayOfYear + 2) % NATURE_ANIMALS_DATA.length;
+
+  const currentPlant = NATURE_PLANTS_DATA[plantIndex];
+  const currentAnimal = NATURE_ANIMALS_DATA[animalIndex];
+
+  // Actualizar etiqueta de fecha y botón "Hoy"
+  const dateLabel = document.getElementById('natureDateLabel');
+  const btnToday = document.getElementById('btnNatureToday');
+  if (dateLabel) {
+    if (natureDayOffset === 0) {
+      dateLabel.textContent = `Descubrimiento de Hoy · ${targetDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}`;
+    } else if (natureDayOffset === -1) {
+      dateLabel.textContent = `Ayer · ${targetDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}`;
+    } else if (natureDayOffset === 1) {
+      dateLabel.textContent = `Mañana · ${targetDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}`;
+    } else {
+      dateLabel.textContent = `${targetDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+    }
+  }
+  if (btnToday) {
+    btnToday.style.display = natureDayOffset === 0 ? 'none' : 'inline-block';
+  }
+
+  // Actualizar botones del segmento
+  const btnPlant = document.getElementById('btn-nature-plant');
+  const btnAnimal = document.getElementById('btn-nature-animal');
+  if (btnPlant) btnPlant.classList.toggle('active', currentNatureSection === 'plant');
+  if (btnAnimal) btnAnimal.classList.toggle('active', currentNatureSection === 'animal');
+
+  if (currentNatureSection === 'plant') {
+    renderPlantShowcase(container, currentPlant);
+  } else {
+    renderAnimalShowcase(container, currentAnimal);
+  }
+}
+
+function renderPlantShowcase(container, item) {
+  container.innerHTML = `
+    <div class="nature-showcase-card">
+      <div class="nature-hero-media" onclick="openNatureLightbox('${escapeHtml(item.photo)}')">
+        <img src="${escapeHtml(item.photo)}" alt="${escapeHtml(item.name)}" class="nature-hero-img"
+          onerror="this.onerror=null; this.src='icon-autumn.svg';">
+        <div class="nature-media-badge">
+          <span>${item.fallbackIcon || '🍄'}</span>
+          <span>${escapeHtml(item.type)}</span>
+        </div>
+        <div class="nature-zoom-hint">🔍 Toca para ampliar foto</div>
+      </div>
+
+      <div class="nature-card-body">
+        <div class="nature-title-group">
+          <span class="nature-scientific-name">Clasificación botánica: <em>${escapeHtml(item.scientificName)}</em></span>
+          <h2 class="nature-common-name">${escapeHtml(item.name)}</h2>
+          <div class="nature-popular-subtitle">«${escapeHtml(item.popularName)}»</div>
+        </div>
+
+        <div class="nature-chips-grid">
+          <div class="nature-chip-item">
+            <strong>🌲 Hábitat natural</strong>
+            <span>${escapeHtml(item.habitat)}</span>
+          </div>
+          <div class="nature-chip-item">
+            <strong>🍂 Época / Estación</strong>
+            <span>${escapeHtml(item.season)}</span>
+          </div>
+          <div class="nature-chip-item">
+            <strong>🍽️ Comestibilidad</strong>
+            <span>${escapeHtml(item.edibility)}</span>
+          </div>
+          <div class="nature-chip-item">
+            <strong>🏷️ Rasgos</strong>
+            <span>${item.tags.join(' · ')}</span>
+          </div>
+        </div>
+
+        <!-- 📜 Historia, Mitología y Tradición -->
+        <div class="nature-story-box">
+          <div class="nature-block-header">
+            <span>📜</span>
+            <span>Historia, Mitología & Tradición</span>
+          </div>
+          <p class="nature-block-text">${escapeHtml(item.history)}</p>
+        </div>
+
+        <!-- 🔬 Características Botánicas o Micológicas -->
+        <div class="nature-features-box">
+          <div class="nature-block-header">
+            <span>🔬</span>
+            <span>Características Botánicas & Morfología</span>
+          </div>
+          <p class="nature-block-text">${escapeHtml(item.characteristics)}</p>
+        </div>
+
+        <!-- ✨ Curiosidad Fascinante -->
+        <div class="nature-curiosity-box">
+          <div class="curiosity-title">
+            <span>✨</span>
+            <span>¿Sabías que...?</span>
+          </div>
+          <p class="nature-block-text">${escapeHtml(item.curiosity)}</p>
+        </div>
+
+        <!-- 🌿 Consejo de Respeto / Recolección -->
+        ${item.tip ? `
+          <div class="nature-tip-box">
+            <strong>🌿 Consejo de la naturaleza:</strong> ${escapeHtml(item.tip)}
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function renderAnimalShowcase(container, item) {
+  container.innerHTML = `
+    <div class="nature-showcase-card">
+      <div class="nature-hero-media" onclick="openNatureLightbox('${escapeHtml(item.photo)}')">
+        <img src="${escapeHtml(item.photo)}" alt="${escapeHtml(item.name)}" class="nature-hero-img"
+          onerror="this.onerror=null; this.src='icon-autumn.svg';">
+        <div class="nature-media-badge">
+          <span>${item.fallbackIcon || '🦊'}</span>
+          <span>${escapeHtml(item.type)}</span>
+        </div>
+        <div class="nature-zoom-hint">🔍 Toca para ampliar foto</div>
+      </div>
+
+      <div class="nature-card-body">
+        <div class="nature-title-group">
+          <span class="nature-scientific-name">Especie: <em>${escapeHtml(item.scientificName)}</em></span>
+          <h2 class="nature-common-name">${escapeHtml(item.name)}</h2>
+          <div class="nature-popular-subtitle">«${escapeHtml(item.popularName)}»</div>
+        </div>
+
+        <div class="nature-chips-grid">
+          <div class="nature-chip-item">
+            <strong>🌲 Hábitat Silvestre</strong>
+            <span>${escapeHtml(item.habitat)}</span>
+          </div>
+          <div class="nature-chip-item">
+            <strong>🍂 Época / Estación</strong>
+            <span>${escapeHtml(item.season)}</span>
+          </div>
+          <div class="nature-chip-item">
+            <strong>🫐 Dieta natural</strong>
+            <span>${escapeHtml(item.diet)}</span>
+          </div>
+          <div class="nature-chip-item">
+            <strong>🏷️ Rasgos</strong>
+            <span>${item.tags.join(' · ')}</span>
+          </div>
+        </div>
+
+        <!-- 📜 Historia, Simbolismo y Leyendas -->
+        <div class="nature-story-box">
+          <div class="nature-block-header">
+            <span>📜</span>
+            <span>Historia, Simbolismo & Leyendas</span>
+          </div>
+          <p class="nature-block-text">${escapeHtml(item.history)}</p>
+        </div>
+
+        <!-- 🐾 Características Físicas y Adaptaciones -->
+        <div class="nature-features-box">
+          <div class="nature-block-header">
+            <span>🐾</span>
+            <span>Características Físicas & Adaptaciones</span>
+          </div>
+          <p class="nature-block-text">${escapeHtml(item.characteristics)}</p>
+        </div>
+
+        <!-- 🍂 Comportamiento en esta estación -->
+        ${item.autumnBehavior ? `
+          <div class="nature-features-box" style="border-left: 4px solid var(--accent-primary); background:var(--bg-card);">
+            <div class="nature-block-header">
+              <span>🍂</span>
+              <span>Comportamiento en esta Estación</span>
+            </div>
+            <p class="nature-block-text">${escapeHtml(item.autumnBehavior)}</p>
+          </div>
+        ` : ''}
+
+        <!-- ✨ Curiosidad Fascinante -->
+        <div class="nature-curiosity-box">
+          <div class="curiosity-title">
+            <span>✨</span>
+            <span>¿Sabías que...?</span>
+          </div>
+          <p class="nature-block-text">${escapeHtml(item.curiosity)}</p>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function switchNatureSection(section) {
+  currentNatureSection = section;
+  renderNatureHub();
+  vibratePhone(20);
+}
+
+function changeNatureDay(delta) {
+  natureDayOffset += delta;
+  renderNatureHub();
+  vibratePhone(24);
+}
+
+function randomNatureDay() {
+  natureDayOffset = Math.floor(Math.random() * 60) - 30;
+  renderNatureHub();
+  vibratePhone(35);
+}
+
+function resetNatureToToday() {
+  natureDayOffset = 0;
+  renderNatureHub();
+  vibratePhone(25);
+}
+
+function navigateToNature(section) {
+  currentNatureSection = section;
+  natureDayOffset = 0;
+
+  // Activar botón en el bottom nav
+  document.querySelectorAll('.nav-item').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-tab') === 'tab-nature');
+  });
+
+  // Activar tab-content correspondiente
+  document.querySelectorAll('.tab-content').forEach(tab => {
+    tab.classList.toggle('active', tab.id === 'tab-nature');
+  });
+
+  renderNatureHub();
+  vibratePhone(25);
+
+  const natureSection = document.getElementById('tab-nature');
+  if (natureSection) {
+    natureSection.scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+function updateDailyNaturePreviews() {
+  if (typeof NATURE_PLANTS_DATA === 'undefined' || typeof NATURE_ANIMALS_DATA === 'undefined') return;
+
+  const today = new Date();
+  const dayOfYear = getDayOfYear(today);
+
+  const plant = NATURE_PLANTS_DATA[Math.abs(dayOfYear) % NATURE_PLANTS_DATA.length];
+  const animal = NATURE_ANIMALS_DATA[Math.abs(dayOfYear + 2) % NATURE_ANIMALS_DATA.length];
+
+  const plantNameEl = document.getElementById('dailyPreviewPlantName');
+  const plantIconEl = document.getElementById('dailyPreviewPlantIcon');
+  const animalNameEl = document.getElementById('dailyPreviewAnimalName');
+  const animalIconEl = document.getElementById('dailyPreviewAnimalIcon');
+
+  if (plantNameEl && plant) plantNameEl.textContent = plant.name;
+  if (plantIconEl && plant) plantIconEl.textContent = plant.fallbackIcon || '🍄';
+  if (animalNameEl && animal) animalNameEl.textContent = animal.name;
+  if (animalIconEl && animal) animalIconEl.textContent = animal.fallbackIcon || '🦊';
+}
+
+function openNatureLightbox(src) {
+  const box = document.getElementById('nature-lightbox');
+  const img = document.getElementById('nature-lightbox-img');
+  if (box && img) {
+    img.src = src;
+    box.classList.add('open');
+    vibratePhone(20);
+  }
+}
+
+function closeNatureLightbox() {
+  const box = document.getElementById('nature-lightbox');
+  if (box) box.classList.remove('open');
+}
+
+// ========================================================
 // GESTIÓN DE NOTAS COMUNES CON AUTO-GUARDADO (DEBOUNCE)
 // ========================================================
 let debounceTimer = null;
@@ -974,11 +1726,12 @@ function importDataBackup(event) {
   reader.onload = function(e) {
     try {
       const imported = JSON.parse(e.target.result);
-      if (imported && (imported.crochet || imported.diamond || imported.reading)) {
+      if (imported && (imported.crochet || imported.diamond || imported.reading || imported.plants)) {
         appData = {
           crochet: Array.isArray(imported.crochet) ? imported.crochet : [],
           diamond: Array.isArray(imported.diamond) ? imported.diamond : [],
-          reading: Array.isArray(imported.reading) ? imported.reading : []
+          reading: Array.isArray(imported.reading) ? imported.reading : [],
+          plants: Array.isArray(imported.plants) ? imported.plants : []
         };
         saveData();
         renderAll();
