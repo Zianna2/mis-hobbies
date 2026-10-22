@@ -7,18 +7,18 @@
   <title>Mis Hobbies - Rincón Cozy & Cottagecore</title>
 
   <!-- PWA Meta Tags -->
-  <meta name="theme-color" id="metaThemeColor" content="#FAF5ED">
+  <meta name="theme-color" id="metaThemeColor" content="#F5EFEB">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Mis Hobbies">
   <link rel="manifest" href="manifest.json">
 
-  <!-- Iconos de la aplicación en el móvil -->
-  <link rel="icon" type="image/png" href="icon-192.png">
-  <link rel="apple-touch-icon" href="icon-192.png">
+  <!-- Iconos de la aplicación adaptados a la estación -->
+  <link rel="icon" id="dynamicFavicon" type="image/svg+xml" href="icon-autumn.svg">
+  <link rel="apple-touch-icon" id="dynamicAppleIcon" href="icon-autumn.svg">
 
   <!-- Estilos visuales Cozy y Estacionales -->
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
 
@@ -27,12 +27,12 @@
     <div class="header-content">
       <div class="brand">
         <div class="brand-icon-wrapper" title="Mis Hobbies">
-          <img src="icon-192.png" alt="Icono Mis Hobbies">
+          <img id="appBrandIcon" src="icon-autumn.svg" alt="Icono Mis Hobbies">
         </div>
         <div>
           <h1 class="brand-title">Mis Hobbies</h1>
           <button id="seasonPill" class="season-pill" onclick="openSeasonModal()" title="Toca para cambiar la estación del año">
-            <span id="seasonPillIcon">🍂</span>
+            <span id="seasonPillIcon">🍄</span>
             <span id="seasonPillText">Otoño Cálido</span>
             <small style="opacity:0.7;">▾</small>
           </button>
@@ -80,6 +80,24 @@
           «No hay nada más poético que un libro abierto junto a una taza de té y una tarde de calma.»
         </blockquote>
         <cite class="quote-author" id="quoteAuthor">— Virginia Woolf</cite>
+      </div>
+
+      <!-- Módulo de Descubrimientos de Hoy: Planta/Hongo & Animal -->
+      <div class="daily-nature-preview-bar">
+        <button class="daily-preview-chip" onclick="navigateToNature('plant')" title="Toca para descubrir la Planta u Hongo de hoy">
+          <span class="daily-preview-icon" id="dailyPreviewPlantIcon">🍄</span>
+          <div class="daily-preview-info">
+            <span class="daily-preview-label">Planta / Hongo de hoy</span>
+            <span class="daily-preview-name" id="dailyPreviewPlantName">Amanita Muscaria</span>
+          </div>
+        </button>
+        <button class="daily-preview-chip" onclick="navigateToNature('animal')" title="Toca para descubrir el Animal de hoy">
+          <span class="daily-preview-icon" id="dailyPreviewAnimalIcon">🦊</span>
+          <div class="daily-preview-info">
+            <span class="daily-preview-label">Animal de hoy</span>
+            <span class="daily-preview-name" id="dailyPreviewAnimalName">Zorro Rojo</span>
+          </div>
+        </button>
       </div>
     </section>
 
@@ -143,6 +161,88 @@
       </div>
     </section>
 
+    <!-- PESTAÑA 4: CUIDADO DE MIS PLANTAS (NUEVO HOBBY) -->
+    <section id="tab-plants" class="tab-content">
+      <div class="banner-illustration-box">
+        <img src="art-plants.jpg" alt="Rincón de Plantas y Jardín" class="banner-art-img">
+        <div class="banner-art-overlay">
+          <div class="banner-text">
+            <h2>Mis Plantas & Jardín 🪴</h2>
+            <p>Riego a tiempo, hojas verdes y rincón en calma</p>
+          </div>
+          <button class="btn btn-primary btn-banner-action" onclick="openNewPlantModal()">
+            + Nueva Planta
+          </button>
+        </div>
+      </div>
+
+      <!-- Métricas rápidas de cuidado de plantas -->
+      <div class="plants-dashboard">
+        <div class="plants-stat-card">
+          <div class="plants-stat-num" id="stat-total-plants">0</div>
+          <div class="plants-stat-label">En Casa</div>
+        </div>
+        <div class="plants-stat-card" style="border-color:#FBD38D; background:#FFFDF8;">
+          <div class="plants-stat-num" id="stat-water-plants" style="color:#DD6B20;">0</div>
+          <div class="plants-stat-label">Toca Regar</div>
+        </div>
+        <div class="plants-stat-card" style="border-color:#C6F6D5; background:#F8FFF9;">
+          <div class="plants-stat-num" id="stat-ok-plants" style="color:#2E7D32;">0</div>
+          <div class="plants-stat-label">Al Día</div>
+        </div>
+      </div>
+
+      <!-- Filtros de plantas -->
+      <div class="plants-filter-bar">
+        <button class="filter-pill active" onclick="filterPlants('all', this)">Todas las plantas</button>
+        <button class="filter-pill" onclick="filterPlants('water', this)">💧 Pendientes de riego</button>
+        <button class="filter-pill" onclick="filterPlants('fertilize', this)">🌿 Pendientes de abono</button>
+        <button class="filter-pill" onclick="filterPlants('ok', this)">🌱 Al día</button>
+      </div>
+
+      <div id="plants-list" class="cards-container">
+        <!-- Tarjetas dinámicas de plantas -->
+      </div>
+    </section>
+
+    <!-- PESTAÑA 5: NATURALEZA Y FAUNA DIARIA (DOS NUEVOS APARTADOS) -->
+    <section id="tab-nature" class="tab-content">
+      <div class="nature-hub-container">
+        
+        <!-- Switcher superior: Planta/Hongo del Día vs Animal del Día -->
+        <div class="nature-segmented-bar">
+          <button id="btn-nature-plant" class="btn-nature-segment active" onclick="switchNatureSection('plant')">
+            <span>🍄</span>
+            <span>Planta u Hongo del Día</span>
+          </button>
+          <button id="btn-nature-animal" class="btn-nature-segment" onclick="switchNatureSection('animal')">
+            <span>🦊</span>
+            <span>Animal del Día</span>
+          </button>
+        </div>
+
+        <!-- Navegador de fecha / Día -->
+        <div class="nature-date-nav">
+          <div class="nature-date-label">
+            <span>📅</span>
+            <span id="natureDateLabel">Descubrimiento de Hoy</span>
+          </div>
+          <div class="nature-date-controls">
+            <button class="btn-nature-nav" onclick="changeNatureDay(-1)" title="Ver día anterior">◀ Anterior</button>
+            <button class="btn-nature-nav" onclick="randomNatureDay()" title="Descubrir especie al azar">✨ Al azar</button>
+            <button class="btn-nature-nav" onclick="changeNatureDay(1)" title="Ver día siguiente">Siguiente ▶</button>
+            <button class="btn-nature-nav" id="btnNatureToday" onclick="resetNatureToToday()" style="display:none;" title="Volver a la fecha actual">Hoy 🔄</button>
+          </div>
+        </div>
+
+        <!-- Contenedor dinámico del elemento de la naturaleza -->
+        <div id="nature-content">
+          <!-- Renderizado dinámico de Planta o Animal -->
+        </div>
+
+      </div>
+    </section>
+
   </main>
 
   <!-- BARRA DE NAVEGACIÓN INFERIOR COZY -->
@@ -158,6 +258,14 @@
     <button class="nav-item" data-tab="tab-reading">
       <span class="nav-icon">☕</span>
       <span class="nav-label">Lectura</span>
+    </button>
+    <button class="nav-item" data-tab="tab-plants">
+      <span class="nav-icon">🪴</span>
+      <span class="nav-label">Plantas</span>
+    </button>
+    <button class="nav-item" data-tab="tab-nature">
+      <span class="nav-icon">🌿</span>
+      <span class="nav-label">Naturaleza</span>
     </button>
   </nav>
 
@@ -178,15 +286,15 @@
 
       <div class="seasons-grid">
         <button class="season-choice-btn" id="season-choice-autumn" onclick="selectSeason('autumn')">
-          <span class="season-choice-icon">🍂</span>
+          <span class="season-choice-icon">🍄</span>
           <span class="season-choice-title">Otoño Cozy</span>
-          <span class="season-choice-desc">Canela, calabaza y miel</span>
+          <span class="season-choice-desc">Marrón claro, seta y canela</span>
         </button>
 
         <button class="season-choice-btn" id="season-choice-winter" onclick="selectSeason('winter')">
           <span class="season-choice-icon">❄️</span>
           <span class="season-choice-title">Invierno Cozy</span>
-          <span class="season-choice-desc">Chocolate y bayas rojas</span>
+          <span class="season-choice-desc">Chocolate y nieve escarchada</span>
         </button>
 
         <button class="season-choice-btn" id="season-choice-spring" onclick="selectSeason('spring')">
@@ -196,9 +304,9 @@
         </button>
 
         <button class="season-choice-btn" id="season-choice-summer" onclick="selectSeason('summer')">
-          <span class="season-choice-icon">☀️</span>
+          <span class="season-choice-icon">🌻</span>
           <span class="season-choice-title">Verano Cozy</span>
-          <span class="season-choice-desc">Melocotón y sol dorado</span>
+          <span class="season-choice-desc">Girasol y sol dorado</span>
         </button>
       </div>
 
@@ -368,16 +476,127 @@
     </div>
   </div>
 
-  <!-- Scripts -->
-  <script src="app.js"></script>
+  <!-- Modal: Nueva Planta / Cuidado Botánico -->
+  <div id="modal-plant" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>🪴 Cuidado de mi Planta</h3>
+        <button class="modal-close" onclick="closeModal('modal-plant')">&times;</button>
+      </div>
+      <form id="form-plant" onsubmit="handleSavePlant(event)">
+        <input type="hidden" id="plant-id" value="">
+        <div class="form-group">
+          <label for="plant-name">Nombre de la planta *</label>
+          <input type="text" id="plant-name" placeholder="Ej: Monstera Deliciosa, Pothos, Helecho" required>
+        </div>
 
-  <!-- Service Worker -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="plant-variety">Variedad / Especie</label>
+            <input type="text" id="plant-variety" placeholder="Ej: Costilla de Adán, Ficus Lyrata">
+          </div>
+          <div class="form-group">
+            <label for="plant-location">Ubicación en casa</label>
+            <input type="text" id="plant-location" placeholder="Ej: Salón, Ventana este, Balcón">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="plant-water-freq">Riego cada (días) *</label>
+            <input type="number" id="plant-water-freq" min="1" max="90" value="7" required>
+            <div style="display:flex; gap:4px; margin-top:5px;">
+              <button type="button" class="btn-counter-small" onclick="setWaterFreqPreset(3)">3d</button>
+              <button type="button" class="btn-counter-small" onclick="setWaterFreqPreset(7)">7d</button>
+              <button type="button" class="btn-counter-small" onclick="setWaterFreqPreset(10)">10d</button>
+              <button type="button" class="btn-counter-small" onclick="setWaterFreqPreset(14)">14d</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="plant-fertilize-freq">Abono cada (días)</label>
+            <input type="number" id="plant-fertilize-freq" min="1" max="365" value="30">
+            <div style="display:flex; gap:4px; margin-top:5px;">
+              <button type="button" class="btn-counter-small" onclick="setFertilizeFreqPreset(15)">15d</button>
+              <button type="button" class="btn-counter-small" onclick="setFertilizeFreqPreset(30)">30d</button>
+              <button type="button" class="btn-counter-small" onclick="setFertilizeFreqPreset(60)">60d</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="plant-light">Necesidad de luz</label>
+          <input type="text" id="plant-light" placeholder="Ej: Luz indirecta brillante, Semisombra, Sol matinal">
+        </div>
+
+        <div class="form-group">
+          <label>Icono o Avatar de la Planta</label>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:4px;" id="plant-icon-selector">
+            <button type="button" class="btn-counter-small plant-icon-choice active" onclick="selectPlantIcon('🪴', this)">🪴 Maceta</button>
+            <button type="button" class="btn-counter-small plant-icon-choice" onclick="selectPlantIcon('🌿', this)">🌿 Hojas</button>
+            <button type="button" class="btn-counter-small plant-icon-choice" onclick="selectPlantIcon('🌵', this)">🌵 Cactus</button>
+            <button type="button" class="btn-counter-small plant-icon-choice" onclick="selectPlantIcon('🌸', this)">🌸 Flor</button>
+            <button type="button" class="btn-counter-small plant-icon-choice" onclick="selectPlantIcon('🎋', this)">🎋 Bambú</button>
+            <button type="button" class="btn-counter-small plant-icon-choice" onclick="selectPlantIcon('🌱', this)">🌱 Brote</button>
+          </div>
+          <input type="hidden" id="plant-icon-value" value="🪴">
+        </div>
+
+        <div class="form-group">
+          <label for="plant-notes">Consejos y notas de cuidado</label>
+          <textarea id="plant-notes" rows="3" placeholder="Sustrato especial, pulverizar las hojas los martes, drenaje de la maceta..."></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-plant')">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-plant">Guardar Planta</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Lightbox: Foto de Naturaleza ampliada -->
+  <div id="nature-lightbox" class="nature-lightbox" onclick="closeNatureLightbox()">
+    <button class="nature-lightbox-close" aria-label="Cerrar">&times;</button>
+    <img id="nature-lightbox-img" class="nature-lightbox-img" src="" alt="Fotografía de Naturaleza">
+  </div>
+
+  <!-- Scripts con versión 4.0 -->
+  <script src="nature-data.js?v=4"></script>
+  <script src="app.js?v=4"></script>
+
+  <!-- Service Worker con actualización inmediata -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then((reg) => console.log('Service Worker Cottagecore registrado:', reg.scope))
+        navigator.serviceWorker.register('./sw.js?v=4')
+          .then((reg) => {
+            console.log('Service Worker Cottagecore registrado:', reg.scope);
+            // Comprobar actualizaciones
+            reg.update();
+            reg.addEventListener('updatefound', () => {
+              const newWorker = reg.installing;
+              if (newWorker) {
+                newWorker.addEventListener('statechange', () => {
+                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    console.log('Nueva versión disponible');
+                    if (confirm('✨ ¡Hay una nueva versión de Mis Hobbies con las nuevas estaciones, plantas y animales! ¿Quieres actualizar ahora?')) {
+                      window.location.reload();
+                    }
+                  }
+                });
+              }
+            });
+          })
           .catch((err) => console.log('Error SW:', err));
+
+        // Cuando el nuevo SW tome el control, recargar
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (!refreshing) {
+            refreshing = true;
+            window.location.reload();
+          }
+        });
       });
     }
   </script>
