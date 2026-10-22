@@ -1,13 +1,13 @@
 {
-  "name": "Mis Hobbies - Registro y Proyectos",
+  "name": "Mis Hobbies - Tu Rincón Creativo",
   "short_name": "Mis Hobbies",
-  "description": "Tu diario visual para tejer, cuadros de diamantes y libros",
+  "description": "Tu diario cozy para proyectos de tejer, cuadros de diamantes y libros",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#FAF7F2",
-  "theme_color": "#FAF7F2",
+  "background_color": "#FAF5ED",
+  "theme_color": "#FAF5ED",
   "icons": [
     {
       "src": "./icon-192.png",
