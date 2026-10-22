@@ -6,46 +6,55 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 /* ========================================================
-   VARIABLES POR DEFECTO: OTOÑO COZY (Canela, Miel y Arcilla)
+   VARIABLES POR DEFECTO: OTOÑO COZY (Marrón Claro, Avellana y Canela)
    ======================================================== */
-:root {
+:root,
+[data-season="autumn"] {
   --font-serif: 'Fraunces', Georgia, serif;
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
-  /* Otoño Cozy por defecto */
-  --bg-app: #FAF5ED;
-  --bg-header: rgba(250, 245, 237, 0.94);
-  --bg-card: #FFFFFF;
-  --bg-subtle: #F4ECE1;
-  --border-card: #EADDCF;
-  --border-subtle: #E2D2C0;
+  /* Otoño: Marrón Claro cálido, Madera suave y Marfil Canela */
+  --bg-app: #F5EFEB;
+  --bg-header: rgba(245, 239, 235, 0.95);
+  --bg-card: #FAF6F0;
+  --bg-subtle: #EAE1D5;
+  --border-card: #DDD0C0;
+  --border-subtle: #D2C3B1;
 
-  --text-main: #3C2A21;
-  --text-muted: #7E6B5D;
-  --text-light: #A89585;
+  --text-main: #3E291C;
+  --text-muted: #735948;
+  --text-light: #9C8271;
 
-  --accent-primary: #D97443;
-  --accent-secondary: #84A59D;
-  --accent-glow: rgba(217, 116, 67, 0.28);
-  --accent-chip: #F5E8DC;
+  --accent-primary: #9C5E33; /* Marrón claro cálido avellana */
+  --accent-secondary: #74805A; /* Musgo de bosque */
+  --accent-glow: rgba(156, 94, 51, 0.28);
+  --accent-chip: #EFE4D6;
 
   /* Hobbies temáticos */
-  --crochet-color: #D97443;
-  --crochet-bg: #FDF3ED;
-  --crochet-border: #F7D7C7;
+  --crochet-color: #A05934;
+  --crochet-bg: #FBF1EA;
+  --crochet-border: #EED7CA;
 
-  --diamond-color: #5D8A7E;
-  --diamond-bg: #EDF6F3;
-  --diamond-border: #C8E2D9;
+  --diamond-color: #5D8074;
+  --diamond-bg: #EFF5F2;
+  --diamond-border: #CFE0D9;
 
-  --reading-color: #7A6987;
-  --reading-bg: #F3EFF7;
-  --reading-border: #DDD5E5;
+  --reading-color: #7B687C;
+  --reading-bg: #F4EFF4;
+  --reading-border: #DED3DE;
+
+  --plants-color: #557A46;
+  --plants-bg: #F1F6EC;
+  --plants-border: #D1E2C8;
+
+  --nature-color: #8C5938;
+  --nature-bg: #F8F1EB;
+  --nature-border: #E5D5C5;
 
   --star-color: #E9A34B;
 
-  --shadow-cozy: 0 8px 24px rgba(92, 64, 46, 0.06);
-  --shadow-hover: 0 14px 32px rgba(92, 64, 46, 0.1);
+  --shadow-cozy: 0 8px 24px rgba(78, 52, 34, 0.07);
+  --shadow-hover: 0 14px 32px rgba(78, 52, 34, 0.12);
   --shadow-glow: 0 4px 16px var(--accent-glow);
 
   --radius-sm: 10px;
@@ -87,6 +96,14 @@
   --reading-color: #4A5773;
   --reading-bg: #EFF3FA;
   --reading-border: #D1DBEB;
+
+  --plants-color: #3B6B56;
+  --plants-bg: #ECF5F0;
+  --plants-border: #C8E0D5;
+
+  --nature-color: #385A75;
+  --nature-bg: #EDF3F8;
+  --nature-border: #CADBE7;
 }
 
 /* ========================================================
@@ -120,6 +137,14 @@
   --reading-color: #847293;
   --reading-bg: #F4F0F7;
   --reading-border: #DDD5E5;
+
+  --plants-color: #4D8B55;
+  --plants-bg: #EFF7EE;
+  --plants-border: #CCE5CB;
+
+  --nature-color: #527A59;
+  --nature-bg: #F0F6EE;
+  --nature-border: #CEE2CC;
 }
 
 /* ========================================================
@@ -153,6 +178,14 @@
   --reading-color: #5B6D96;
   --reading-bg: #EFF3FA;
   --reading-border: #D1DDF0;
+
+  --plants-color: #438A62;
+  --plants-bg: #EDF7F1;
+  --plants-border: #C7E6D4;
+
+  --nature-color: #9C6036;
+  --nature-bg: #FAF0E8;
+  --nature-border: #E8D3C4;
 }
 
 /* ========================================================
@@ -548,6 +581,16 @@ h1, h2, h3, .serif-font {
 #tab-reading .btn-primary {
   background-color: var(--reading-color);
   box-shadow: 0 6px 18px rgba(122, 105, 135, 0.3);
+}
+
+#tab-plants .btn-primary {
+  background-color: var(--plants-color);
+  box-shadow: 0 6px 18px rgba(85, 122, 70, 0.35);
+}
+
+#tab-nature .btn-primary {
+  background-color: var(--accent-primary);
+  box-shadow: 0 6px 18px var(--accent-glow);
 }
 
 .btn-secondary {
@@ -1163,6 +1206,14 @@ h1, h2, h3, .serif-font {
   color: var(--reading-color);
 }
 
+.nav-item[data-tab="tab-plants"].active {
+  color: var(--plants-color);
+}
+
+.nav-item[data-tab="tab-nature"].active {
+  color: var(--accent-primary);
+}
+
 /* ========================================================
    MODALES COZY
    ======================================================== */
@@ -1338,3 +1389,687 @@ textarea:focus {
   gap: 10px;
   margin-top: 22px;
 }
+
+/* ========================================================
+   VISTA PREVIA DE DESCUBRIMIENTOS EN LA TARJETA DIARIA
+   ======================================================== */
+.daily-nature-preview-bar {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border-subtle);
+}
+
+.daily-preview-chip {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--bg-subtle);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: transform 0.12s ease, background-color 0.2s, box-shadow 0.2s;
+  text-align: left;
+}
+
+.daily-preview-chip:active {
+  transform: scale(0.96);
+  background-color: var(--accent-chip);
+}
+
+.daily-preview-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.daily-preview-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.daily-preview-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--accent-primary);
+  letter-spacing: 0.4px;
+}
+
+.daily-preview-name {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ========================================================
+   PESTAÑA DE HOBBIES: CUIDADO DE MIS PLANTAS (🪴)
+   ======================================================== */
+.plants-dashboard {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.plants-stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-md);
+  padding: 12px 10px;
+  text-align: center;
+  box-shadow: var(--shadow-cozy);
+}
+
+.plants-stat-num {
+  font-family: var(--font-serif);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--plants-color);
+  line-height: 1.1;
+}
+
+.plants-stat-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.plants-filter-bar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin-bottom: 18px;
+  scrollbar-width: none;
+}
+
+.plants-filter-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.filter-pill {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.filter-pill.active {
+  background: var(--plants-color);
+  color: #FFFFFF;
+  border-color: var(--plants-color);
+  box-shadow: 0 4px 12px rgba(85, 122, 70, 0.25);
+}
+
+/* Tarjeta individual de planta */
+.plant-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-cozy);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+}
+
+.plant-card-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.plant-avatar {
+  width: 58px;
+  height: 58px;
+  min-width: 58px;
+  border-radius: var(--radius-md);
+  background: var(--plants-bg);
+  border: 1.5px solid var(--plants-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);
+}
+
+.plant-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.plant-title-info {
+  flex: 1;
+}
+
+.plant-name {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.2;
+}
+
+.plant-variety {
+  font-size: 0.84rem;
+  font-style: italic;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+.plant-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 5px;
+}
+
+.plant-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-subtle);
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+}
+
+/* Indicador de Riego */
+.water-status-box {
+  background: var(--plants-bg);
+  border: 1.5px solid var(--plants-border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+
+.water-status-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.water-status-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--plants-color);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+/* Badges de estado de riego */
+.badge-water-needed {
+  background-color: #FDF2E9;
+  color: #C05621;
+  border: 1px solid #FBD38D;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  animation: pulseWater 2s infinite ease-in-out;
+}
+
+@keyframes pulseWater {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+
+.badge-water-ok {
+  background-color: #EDF7F2;
+  color: #276749;
+  border: 1px solid #C6F6D5;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-water-late {
+  background-color: #FFF5F5;
+  color: #C53030;
+  border: 1px solid #FEB2B2;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Barra de hidratación visual */
+.hydration-bar-container {
+  margin: 10px 0 6px 0;
+}
+
+.hydration-bar-track {
+  height: 10px;
+  background: #FFFFFF;
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  border: 1px solid var(--plants-border);
+}
+
+.hydration-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, #78B58F 0%, #4D8B55 100%);
+  transition: width 0.4s ease;
+}
+
+.hydration-bar-fill.warning {
+  background: linear-gradient(90deg, #F6AD55 0%, #DD6B20 100%);
+}
+
+.hydration-bar-fill.danger {
+  background: linear-gradient(90deg, #FC8181 0%, #E53E3E 100%);
+}
+
+.water-dates-grid {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+.fertilize-info-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  background: var(--bg-card);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  margin-top: 10px;
+}
+
+/* Botones de acción de la planta */
+.plant-actions-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.btn-plant-action {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: transform 0.1s ease, filter 0.15s ease, box-shadow 0.2s;
+}
+
+.btn-plant-action:active {
+  transform: scale(0.94);
+}
+
+.btn-water {
+  background: #3182CE;
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(49, 130, 206, 0.35);
+}
+
+.btn-fertilize {
+  background: var(--plants-color);
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(85, 122, 70, 0.35);
+}
+
+/* ========================================================
+   SECCIÓN DE NATURALEZA Y FAUNA DIARIA (#tab-nature)
+   Planta u Hongo del Día & Animal del Día
+   ======================================================== */
+.nature-hub-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Switcher / Segmentos superiores */
+.nature-segmented-bar {
+  display: flex;
+  background: var(--bg-card);
+  padding: 4px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--border-card);
+  box-shadow: var(--shadow-cozy);
+}
+
+.btn-nature-segment {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-nature-segment.active {
+  background: var(--accent-primary);
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px var(--accent-glow);
+}
+
+/* Barra de navegación de fecha (Ayer, Hoy, Mañana, Al Azar) */
+.nature-date-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  box-shadow: var(--shadow-cozy);
+}
+
+.nature-date-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nature-date-controls {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-nature-nav {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-subtle);
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: transform 0.1s, background-color 0.2s;
+}
+
+.btn-nature-nav:active {
+  transform: scale(0.92);
+  background-color: var(--accent-chip);
+}
+
+/* Tarjeta de visualización y estudio de naturaleza */
+.nature-showcase-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-cozy);
+  margin-bottom: 20px;
+}
+
+.nature-hero-media {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  background-color: var(--bg-subtle);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.nature-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.nature-hero-media:hover .nature-hero-img {
+  transform: scale(1.03);
+}
+
+.nature-media-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background: rgba(28, 20, 15, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #FFFFFF;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 0.76rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.nature-zoom-hint {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(6px);
+  color: var(--text-main);
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 0.74rem;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.nature-card-body {
+  padding: 24px;
+}
+
+.nature-title-group {
+  margin-bottom: 14px;
+}
+
+.nature-scientific-name {
+  font-style: italic;
+  font-size: 0.94rem;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  display: block;
+}
+
+.nature-common-name {
+  font-family: var(--font-serif);
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.15;
+}
+
+.nature-popular-subtitle {
+  font-size: 0.92rem;
+  color: var(--accent-primary);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.nature-chips-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin: 16px 0 22px 0;
+}
+
+.nature-chip-item {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-subtle);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+}
+
+.nature-chip-item strong {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.nature-chip-item span {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+/* Bloques de contenido narrativo (Historia, Botánica, Curiosidades) */
+.nature-section-block {
+  margin-bottom: 20px;
+}
+
+.nature-block-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 8px;
+}
+
+.nature-block-text {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--text-main);
+}
+
+/* Cajas temáticas decorativas */
+.nature-story-box {
+  background: var(--nature-bg);
+  border-left: 4px solid var(--accent-primary);
+  padding: 16px 18px;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  margin-bottom: 20px;
+}
+
+.nature-features-box {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-subtle);
+  padding: 16px 18px;
+  border-radius: var(--radius-md);
+  margin-bottom: 20px;
+}
+
+.nature-curiosity-box {
+  background: #FFF9ED;
+  border: 1.5px dashed #F6D89B;
+  padding: 16px 18px;
+  border-radius: var(--radius-md);
+  margin-bottom: 20px;
+}
+
+[data-season="autumn"] .nature-curiosity-box {
+  background: #FAF3E6;
+  border-color: #E2C9A2;
+}
+
+.nature-curiosity-box .curiosity-title {
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: #B7791F;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nature-tip-box {
+  background: #EDF7F2;
+  border-left: 4px solid #38A169;
+  padding: 14px 18px;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  font-size: 0.88rem;
+  color: #22543D;
+  line-height: 1.5;
+}
+
+/* Lightbox de fotografía de naturaleza */
+.nature-lightbox {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(18, 12, 8, 0.92);
+  z-index: 300;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.nature-lightbox.open {
+  display: flex;
+  animation: cozyFade 0.2s ease-out;
+}
+
+.nature-lightbox-img {
+  max-width: 96%;
+  max-height: 85vh;
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  object-fit: contain;
+}
+
+.nature-lightbox-close {
+  position: absolute;
+  top: 18px;
+  right: 22px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
+  border: none;
+  font-size: 1.8rem;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
