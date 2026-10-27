@@ -18,7 +18,7 @@
   <link rel="apple-touch-icon" id="dynamicAppleIcon" href="icon-autumn.svg">
 
   <!-- Estilos visuales Cozy y Estacionales -->
-  <link rel="stylesheet" href="style.css?v=4">
+  <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 
@@ -560,15 +560,15 @@
     <img id="nature-lightbox-img" class="nature-lightbox-img" src="" alt="Fotografía de Naturaleza">
   </div>
 
-  <!-- Scripts con versión 4.0 -->
-  <script src="nature-data.js?v=4"></script>
-  <script src="app.js?v=4"></script>
+  <!-- Scripts con versión 5.0 -->
+  <script src="nature-data.js?v=5"></script>
+  <script src="app.js?v=5"></script>
 
   <!-- Service Worker con actualización inmediata -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=4')
+        navigator.serviceWorker.register('./sw.js?v=5')
           .then((reg) => {
             console.log('Service Worker Cottagecore registrado:', reg.scope);
             // Comprobar actualizaciones
