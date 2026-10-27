@@ -168,6 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupNavigation();
   setupBackupModal();
   setupStarRatingInput();
+  checkAppSecurityOnLaunch();
   renderAll();
 });
 
@@ -455,6 +456,7 @@ function setupNavigation() {
 // ========================================================
 function renderAll() {
   renderDiaryHistory();
+  renderDiaryCalendar();
   renderCrochet();
   renderDiamond();
   renderReading();
@@ -1844,6 +1846,7 @@ function initDiarySystem() {
   });
 
   renderDiaryHistory();
+  renderDiaryCalendar();
 }
 
 function handleDiaryInput() {
@@ -1926,6 +1929,8 @@ function saveCurrentDiaryEntry() {
 
   saveData();
   renderDiaryHistory();
+  renderDiaryCalendar();
+  renderDiaryCalendar();
   vibratePhone(30);
 
   const statusEl = document.getElementById('diarySavedStatus');
@@ -2036,6 +2041,7 @@ function loadDiaryEntryToEdit(id) {
   };
   saveData();
   renderDiaryHistory();
+  renderDiaryCalendar();
 
   if (textInput) {
     textInput.focus();
@@ -2052,6 +2058,7 @@ function deleteDiaryEntry(id) {
   appData.diary.entries = appData.diary.entries.filter(e => e.id !== id);
   saveData();
   renderDiaryHistory();
+  renderDiaryCalendar();
   vibratePhone(25);
   showCozyToast('🗑️ Página eliminada del diario.');
 }
@@ -2070,4 +2077,423 @@ function showCozyToast(message) {
   toast._timeout = setTimeout(() => {
     toast.classList.remove('visible');
   }, 2400);
+}
+
+// ========================================================
+// CALENDARIO MENSUAL DE PENSAMIENTOS (TABLA)
+// ========================================================
+let currentCalendarMonth = new Date().getMonth();
+let currentCalendarYear = new Date().getFullYear();
+let selectedCalendarDay = null; // 'YYYY-MM-DD'
+
+function renderDiaryCalendar() {
+  const tbody = document.getElementById('diaryCalendarBody');
+  const labelEl = document.getElementById('diaryCalendarMonthYear');
+  if (!tbody || !labelEl) return;
+
+  const monthNames = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  ];
+
+  labelEl.textContent = `${monthNames[currentCalendarMonth]} ${currentCalendarYear}`;
+
+  // Mapear días con entradas
+  const entryDateMap = {};
+  const entries = (appData.diary && Array.isArray(appData.diary.entries)) ? appData.diary.entries : [];
+  entries.forEach(entry => {
+    if (!entry.date) return;
+    const d = new Date(entry.date);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    if (!entryDateMap[key]) entryDateMap[key] = [];
+    entryDateMap[key].push(entry);
+  });
+
+  const today = new Date();
+  const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+  const firstDay = new Date(currentCalendarYear, currentCalendarMonth, 1);
+  const totalDays = new Date(currentCalendarYear, currentCalendarMonth + 1, 0).getDate();
+  const startDayIndex = (firstDay.getDay() + 6) % 7; // Lunes = 0
+
+  let html = '';
+  let dayCounter = 1;
+  const numRows = Math.ceil((startDayIndex + totalDays) / 7);
+
+  for (let row = 0; row < numRows; row++) {
+    html += '<tr>';
+    for (let col = 0; col < 7; col++) {
+      const cellIndex = row * 7 + col;
+      if (cellIndex < startDayIndex || dayCounter > totalDays) {
+        html += '<td class="cal-cell empty"></td>';
+      } else {
+        const thisDay = dayCounter;
+        const dateKey = `${currentCalendarYear}-${String(currentCalendarMonth + 1).padStart(2, '0')}-${String(thisDay).padStart(2, '0')}`;
+        const dayEntries = entryDateMap[dateKey];
+        const hasEntry = !!(dayEntries && dayEntries.length > 0);
+        const isToday = (dateKey === todayKey);
+        const isSelected = (dateKey === selectedCalendarDay);
+
+        let cellClasses = ['cal-cell'];
+        if (isToday) cellClasses.push('is-today');
+        if (hasEntry) cellClasses.push('has-entry');
+        if (isSelected) cellClasses.push('is-selected');
+
+        const primaryMood = hasEntry ? (dayEntries[0].mood || '🍂') : '';
+
+        html += `
+          <td class="${cellClasses.join(' ')}" onclick="handleCalendarDayClick('${dateKey}', ${hasEntry})">
+            <span class="cal-day-num">${thisDay}</span>
+            ${hasEntry ? `<span class="cal-entry-badge" title="${dayEntries.length} nota(s)">${primaryMood}</span>` : ''}
+          </td>
+        `;
+        dayCounter++;
+      }
+    }
+    html += '</tr>';
+  }
+
+  tbody.innerHTML = html;
+  renderCalendarDayDetails(selectedCalendarDay, entryDateMap);
+}
+
+function changeDiaryCalendarMonth(delta) {
+  currentCalendarMonth += delta;
+  if (currentCalendarMonth < 0) {
+    currentCalendarMonth = 11;
+    currentCalendarYear--;
+  } else if (currentCalendarMonth > 11) {
+    currentCalendarMonth = 0;
+    currentCalendarYear++;
+  }
+  selectedCalendarDay = null;
+  renderDiaryCalendar();
+  vibratePhone(15);
+}
+
+function resetDiaryCalendarToday() {
+  const now = new Date();
+  currentCalendarMonth = now.getMonth();
+  currentCalendarYear = now.getFullYear();
+  selectedCalendarDay = null;
+  renderDiaryCalendar();
+  vibratePhone(20);
+}
+
+function handleCalendarDayClick(dateKey, hasEntry) {
+  if (selectedCalendarDay === dateKey) {
+    selectedCalendarDay = null;
+  } else {
+    selectedCalendarDay = dateKey;
+  }
+  renderDiaryCalendar();
+  vibratePhone(15);
+}
+
+function renderCalendarDayDetails(dateKey, entryDateMap) {
+  const container = document.getElementById('calendar-day-entries');
+  if (!container) return;
+
+  if (!dateKey) {
+    container.style.display = 'none';
+    container.innerHTML = '';
+    return;
+  }
+
+  const entries = (entryDateMap && entryDateMap[dateKey]) || [];
+  const parts = dateKey.split('-');
+  const y = parseInt(parts[0]);
+  const m = parseInt(parts[1]);
+  const d = parseInt(parts[2]);
+  const dateObj = new Date(y, m - 1, d);
+  const dateFormatted = getCozyDateFormatted(dateObj);
+
+  if (entries.length === 0) {
+    container.style.display = 'block';
+    container.innerHTML = `
+      <div class="cal-detail-card">
+        <div class="cal-detail-header">
+          <span>📅 ${dateFormatted}</span>
+          <button type="button" class="cal-detail-close" onclick="closeCalendarDayDetails()">&times;</button>
+        </div>
+        <p class="cal-detail-empty">No hay notas escritas en este día.</p>
+        <button type="button" class="btn btn-secondary" style="font-size:0.78rem; padding:5px 12px;" onclick="startDiaryForDate('${dateKey}')">
+          ✏️ Escribir nota para este día
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  container.style.display = 'block';
+  container.innerHTML = `
+    <div class="cal-detail-card">
+      <div class="cal-detail-header">
+        <span>📖 ${dateFormatted} (${entries.length} entrada${entries.length > 1 ? 's' : ''})</span>
+        <button type="button" class="cal-detail-close" onclick="closeCalendarDayDetails()">&times;</button>
+      </div>
+      <div class="cal-detail-list">
+        ${entries.map(e => `
+          <div class="cal-detail-entry">
+            <div class="cal-detail-entry-top">
+              <strong>${e.mood || '☕'} ${escapeHtml(e.title || 'Pensamiento')}</strong>
+              <button type="button" class="btn-entry-action" onclick="loadDiaryEntryToEdit('${e.id}')">✏️ Cargar en bloc</button>
+            </div>
+            <p>${escapeHtml(e.text)}</p>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function closeCalendarDayDetails() {
+  selectedCalendarDay = null;
+  renderDiaryCalendar();
+}
+
+function startDiaryForDate(dateKey) {
+  const parts = dateKey.split('-');
+  const y = parts[0];
+  const m = parts[1];
+  const d = parts[2];
+  const titleInput = document.getElementById('diaryEntryTitle');
+  const textInput = document.getElementById('diaryEntryText');
+
+  if (titleInput) {
+    titleInput.value = `Nota del ${d}/${m}/${y}`;
+  }
+  if (textInput) {
+    textInput.focus();
+    textInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  selectedCalendarDay = null;
+  renderDiaryCalendar();
+  showCozyToast(`✏️ Bloc listo para escribir nota.`);
+}
+
+// ========================================================
+// SISTEMA DE SEGURIDAD CON CONTRASEÑA
+// ========================================================
+const SECURITY_STORAGE_KEY = 'mis_hobbies_security_pin';
+const SECURITY_UNLOCKED_KEY = 'mis_hobbies_unlocked';
+
+function checkAppSecurityOnLaunch() {
+  updateSecurityUIState();
+  const storedPassword = localStorage.getItem(SECURITY_STORAGE_KEY);
+  if (!storedPassword) return; // Sin contraseña configurada
+
+  const isUnlocked = sessionStorage.getItem(SECURITY_UNLOCKED_KEY) === 'true';
+  const overlay = document.getElementById('lock-screen-overlay');
+  if (overlay) {
+    if (!isUnlocked) {
+      overlay.style.display = 'flex';
+      const input = document.getElementById('lockInputPassword');
+      if (input) {
+        input.value = '';
+        setTimeout(() => input.focus(), 250);
+      }
+    } else {
+      overlay.style.display = 'none';
+    }
+  }
+}
+
+function updateSecurityUIState() {
+  const storedPassword = localStorage.getItem(SECURITY_STORAGE_KEY);
+  const lockBtn = document.getElementById('btnLockApp');
+  if (lockBtn) {
+    if (storedPassword) {
+      lockBtn.innerHTML = '🔒';
+      lockBtn.title = 'Bloquear aplicación ahora (Protegida con contraseña)';
+    } else {
+      lockBtn.innerHTML = '🔓';
+      lockBtn.title = 'Configurar contraseña de seguridad';
+    }
+  }
+
+  // Actualizar contenido del modal de seguridad si existe
+  const statusHeading = document.getElementById('securityStatusHeading');
+  const statusDesc = document.getElementById('securityStatusDesc');
+  const statusIcon = document.getElementById('securityStatusIcon');
+  const groupCurrent = document.getElementById('groupCurrentPassword');
+  const btnRemove = document.getElementById('btnRemoveSecurity');
+  const secNewPasswordLabel = document.getElementById('secNewPasswordLabel');
+
+  if (statusHeading) {
+    if (storedPassword) {
+      statusHeading.textContent = 'Protegida con Contraseña';
+      statusDesc.textContent = 'La aplicación está bloqueada para personas sin contraseña.';
+      statusIcon.textContent = '🔒';
+      if (groupCurrent) groupCurrent.style.display = 'block';
+      if (btnRemove) btnRemove.style.display = 'inline-block';
+      if (secNewPasswordLabel) secNewPasswordLabel.textContent = 'Nueva Contraseña o PIN';
+    } else {
+      statusHeading.textContent = 'Sin contraseña configurada';
+      statusDesc.textContent = 'Cualquiera que abra la app puede ver tus notas y aficiones.';
+      statusIcon.textContent = '🔓';
+      if (groupCurrent) groupCurrent.style.display = 'none';
+      if (btnRemove) btnRemove.style.display = 'none';
+      if (secNewPasswordLabel) secNewPasswordLabel.textContent = 'Elige una Contraseña o PIN';
+    }
+  }
+}
+
+function handleSecurityButton() {
+  const storedPassword = localStorage.getItem(SECURITY_STORAGE_KEY);
+  if (storedPassword) {
+    // Si ya tiene contraseña, bloquear inmediatamente
+    lockAppNow();
+  } else {
+    // Si no tiene contraseña, abrir modal de configuración
+    openSecurityModal();
+  }
+}
+
+function lockAppNow() {
+  sessionStorage.removeItem(SECURITY_UNLOCKED_KEY);
+  const overlay = document.getElementById('lock-screen-overlay');
+  const errorMsg = document.getElementById('lockErrorMessage');
+  const input = document.getElementById('lockInputPassword');
+
+  if (errorMsg) errorMsg.style.display = 'none';
+  if (input) input.value = '';
+  if (overlay) {
+    overlay.style.display = 'flex';
+    if (input) setTimeout(() => input.focus(), 250);
+  }
+  vibratePhone(25);
+  showCozyToast('🔒 Aplicación bloqueada.');
+}
+
+function handleUnlockSubmit(event) {
+  event.preventDefault();
+  const input = document.getElementById('lockInputPassword');
+  const errorMsg = document.getElementById('lockErrorMessage');
+  const storedPassword = localStorage.getItem(SECURITY_STORAGE_KEY);
+  const entered = (input?.value || '').trim();
+
+  if (storedPassword && entered === storedPassword) {
+    sessionStorage.setItem(SECURITY_UNLOCKED_KEY, 'true');
+    const overlay = document.getElementById('lock-screen-overlay');
+    if (overlay) {
+      overlay.style.display = 'none';
+    }
+    if (errorMsg) errorMsg.style.display = 'none';
+    if (input) input.value = '';
+    vibratePhone(25);
+    showCozyToast('✨ ¡Bienvenida de nuevo!');
+  } else {
+    vibratePhone(60);
+    if (errorMsg) {
+      errorMsg.textContent = '⚠️ Contraseña incorrecta. Inténtalo de nuevo.';
+      errorMsg.style.display = 'block';
+    }
+    if (input) {
+      input.select();
+      input.focus();
+    }
+  }
+}
+
+function togglePasswordVisibility(inputId, btnEl) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const isPassword = input.type === 'password';
+  input.type = isPassword ? 'text' : 'password';
+  if (btnEl) {
+    btnEl.textContent = isPassword ? '🙈' : '👁️';
+  }
+}
+
+function openSecurityModal() {
+  updateSecurityUIState();
+  const modal = document.getElementById('modal-security');
+  const err = document.getElementById('secErrorMsg');
+  if (err) err.style.display = 'none';
+  const form = document.getElementById('securityConfigForm');
+  if (form) form.reset();
+  if (modal) modal.classList.add('open');
+}
+
+function handleSaveSecurityConfig(event) {
+  event.preventDefault();
+  const storedPassword = localStorage.getItem(SECURITY_STORAGE_KEY);
+  const currentPassInput = document.getElementById('secCurrentPassword');
+  const newPassInput = document.getElementById('secNewPassword');
+  const confirmPassInput = document.getElementById('secConfirmPassword');
+  const errorMsg = document.getElementById('secErrorMsg');
+
+  const currentEntered = (currentPassInput?.value || '').trim();
+  const newPass = (newPassInput?.value || '').trim();
+  const confirmPass = (confirmPassInput?.value || '').trim();
+
+  // Si ya existía contraseña, verificar la actual
+  if (storedPassword && currentEntered !== storedPassword) {
+    if (errorMsg) {
+      errorMsg.textContent = '⚠️ La contraseña actual introducida no es correcta.';
+      errorMsg.style.display = 'block';
+    }
+    vibratePhone(40);
+    return;
+  }
+
+  if (!newPass || newPass.length < 3) {
+    if (errorMsg) {
+      errorMsg.textContent = '⚠️ La nueva contraseña debe tener al menos 3 caracteres.';
+      errorMsg.style.display = 'block';
+    }
+    vibratePhone(40);
+    return;
+  }
+
+  if (newPass !== confirmPass) {
+    if (errorMsg) {
+      errorMsg.textContent = '⚠️ Las contraseñas no coinciden.';
+      errorMsg.style.display = 'block';
+    }
+    vibratePhone(40);
+    return;
+  }
+
+  localStorage.setItem(SECURITY_STORAGE_KEY, newPass);
+  sessionStorage.setItem(SECURITY_UNLOCKED_KEY, 'true');
+  updateSecurityUIState();
+  closeModal('modal-security');
+  vibratePhone(30);
+  showCozyToast('🔐 ¡Contraseña guardada con éxito!');
+}
+
+function handleRemoveSecurity() {
+  const storedPassword = localStorage.getItem(SECURITY_STORAGE_KEY);
+  if (!storedPassword) return;
+
+  const currentEntered = prompt('Introduce tu contraseña actual para desactivar la seguridad:');
+  if (currentEntered === null) return; // Cancelado
+
+  if (currentEntered.trim() === storedPassword) {
+    localStorage.removeItem(SECURITY_STORAGE_KEY);
+    sessionStorage.removeItem(SECURITY_UNLOCKED_KEY);
+    updateSecurityUIState();
+    closeModal('modal-security');
+    vibratePhone(25);
+    showCozyToast('🔓 Contraseña desactivada.');
+  } else {
+    alert('Contraseña incorrecta. No se ha desactivado la seguridad.');
+  }
+}
+
+function handleForgotSecurityPassword() {
+  const proceed = confirm(
+    '¿Has olvidado tu contraseña?\n\nSi aceptas, se desactivará la contraseña para que puedas entrar a tu aplicación.\n\nNota: Tus notas del diario, plantas y aficiones NO se borrarán.'
+  );
+  if (proceed) {
+    localStorage.removeItem(SECURITY_STORAGE_KEY);
+    sessionStorage.setItem(SECURITY_UNLOCKED_KEY, 'true');
+    const overlay = document.getElementById('lock-screen-overlay');
+    if (overlay) overlay.style.display = 'none';
+    updateSecurityUIState();
+    vibratePhone(30);
+    showCozyToast('🔓 Contraseña restablecida. Puedes entrar a la app.');
+  }
 }

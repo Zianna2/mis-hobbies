@@ -18,7 +18,7 @@
   <link rel="apple-touch-icon" id="dynamicAppleIcon" href="icon-autumn.svg">
 
   <!-- Estilos visuales Cozy y Estacionales -->
-  <link rel="stylesheet" href="style.css?v=6">
+  <link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
 
@@ -39,6 +39,9 @@
         </div>
       </div>
       <div class="header-actions">
+        <button id="btnLockApp" class="btn-icon" onclick="handleSecurityButton()" title="Bloquear / Seguridad con contraseña" aria-label="Seguridad">
+          🔒
+        </button>
         <button id="btnBackupModal" class="btn-icon" title="Copia de seguridad y datos" aria-label="Ajustes y copia">
           💾
         </button>
@@ -71,20 +74,29 @@
 
       <!-- 2. Bloc de Notas / Diario para escribir pensamientos -->
       <div class="diary-widget">
+        
+        <!-- Cabecera del diario: Título y estado de guardado -->
         <div class="diary-card-header">
           <div class="diary-brand-title">
             <span class="diary-main-icon">📖</span>
-            <div>
-              <h2 class="diary-heading">Mi Diario de Pensamientos</h2>
+            <div class="diary-heading-wrap">
+              <h2 class="diary-heading">Mi Diario</h2>
               <span class="diary-subdate" id="diaryCurrentDate">Hoy</span>
             </div>
           </div>
-          <div class="diary-actions-top">
-            <span class="diary-status-badge" id="diarySavedStatus">✨ Al día</span>
-            <button type="button" class="btn-diary-pill" onclick="startNewDiaryEntry()" title="Comenzar una nueva hoja en blanco">
-              ➕ Nueva hoja
-            </button>
-          </div>
+          <span class="diary-status-badge" id="diarySavedStatus">✨ Al día</span>
+        </div>
+
+        <!-- Barra de acciones rápidas integrada (Nueva hoja & Guardar) -->
+        <div class="diary-quick-toolbar">
+          <button type="button" class="btn-diary-action new-page" onclick="startNewDiaryEntry()" title="Comenzar una nueva hoja en blanco">
+            <span>➕</span>
+            <span>Nueva hoja</span>
+          </button>
+          <button type="button" class="btn-diary-action save-page" onclick="saveCurrentDiaryEntry()" title="Guardar esta página en el diario">
+            <span>💾</span>
+            <span>Guardar página</span>
+          </button>
         </div>
 
         <!-- Lienzo de papel para escribir notas y reflexiones -->
@@ -108,10 +120,57 @@
                 <button type="button" class="btn-mood" data-mood="✨" onclick="setDiaryMood('✨', this)" title="Inspiración">✨</button>
               </div>
             </div>
-            <button type="button" class="btn-diary-archive" onclick="saveCurrentDiaryEntry()" title="Guardar esta página en el diario">
-              💾 Guardar en el diario
-            </button>
           </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- CALENDARIO MENSUAL DE PENSAMIENTOS         -->
+        <!-- Formato tabla interactivo                  -->
+        <!-- ========================================== -->
+        <div class="diary-calendar-section">
+          <div class="diary-calendar-header">
+            <div class="calendar-title-group">
+              <span class="calendar-icon">📅</span>
+              <div>
+                <h3 class="calendar-heading">Calendario de Pensamientos</h3>
+                <span class="calendar-sub">Días con reflexiones guardadas</span>
+              </div>
+            </div>
+            <div class="calendar-nav-controls">
+              <button type="button" class="btn-cal-nav" onclick="changeDiaryCalendarMonth(-1)" title="Mes anterior">◀</button>
+              <span id="diaryCalendarMonthYear" class="calendar-month-label">Octubre 2026</span>
+              <button type="button" class="btn-cal-nav" onclick="changeDiaryCalendarMonth(1)" title="Mes siguiente">▶</button>
+              <button type="button" class="btn-cal-today" onclick="resetDiaryCalendarToday()" title="Ir al mes actual">Hoy</button>
+            </div>
+          </div>
+
+          <!-- Tabla del Calendario Mensual -->
+          <div class="calendar-table-wrapper">
+            <table class="diary-calendar-table">
+              <thead>
+                <tr>
+                  <th>Lun</th>
+                  <th>Mar</th>
+                  <th>Mié</th>
+                  <th>Jue</th>
+                  <th>Vie</th>
+                  <th>Sáb</th>
+                  <th>Dom</th>
+                </tr>
+              </thead>
+              <tbody id="diaryCalendarBody">
+                <!-- Celdas de días generadas dinámicamente -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="calendar-legend-bar">
+            <span class="legend-item"><span class="legend-dot active"></span> Día con diario</span>
+            <span class="legend-item"><span class="legend-dot today"></span> Hoy</span>
+          </div>
+
+          <!-- Detalle de entradas del día seleccionado en el calendario -->
+          <div id="calendar-day-entries" class="calendar-day-entries" style="display: none;"></div>
         </div>
 
         <!-- Historial desplegable de pensamientos y páginas anteriores -->
@@ -119,7 +178,7 @@
           <button type="button" class="diary-archive-toggle" onclick="toggleDiaryHistory()">
             <span class="diary-archive-toggle-text">
               <span>📚</span>
-              <span>Páginas anteriores del diario (<strong id="diaryCount">0</strong>)</span>
+              <span>Todas las páginas anteriores (<strong id="diaryCount">0</strong>)</span>
             </span>
             <span id="diaryHistoryToggleIcon" class="diary-toggle-arrow">▾</span>
           </button>
@@ -603,21 +662,104 @@
     </div>
   </div>
 
+  <!-- ========================================== -->
+  <!-- MODAL: AJUSTES DE SEGURIDAD Y CONTRASEÑA   -->
+  <!-- ========================================== -->
+  <div id="modal-security" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>🔐 Seguridad con Contraseña</h3>
+        <button class="modal-close" onclick="closeModal('modal-security')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="security-status-box">
+          <span id="securityStatusIcon" class="security-status-icon">🔓</span>
+          <div>
+            <h4 id="securityStatusHeading" class="security-status-heading">Sin contraseña</h4>
+            <p id="securityStatusDesc" class="security-status-desc">Cualquiera que abra la app puede ver tus notas y aficiones.</p>
+          </div>
+        </div>
+
+        <form id="securityConfigForm" onsubmit="handleSaveSecurityConfig(event)">
+          <div class="form-group" id="groupCurrentPassword" style="display: none;">
+            <label for="secCurrentPassword">Contraseña Actual</label>
+            <input type="password" id="secCurrentPassword" placeholder="Introduce la contraseña actual">
+          </div>
+
+          <div class="form-group">
+            <label for="secNewPassword" id="secNewPasswordLabel">Nueva Contraseña o PIN</label>
+            <div class="pwd-field-group">
+              <input type="password" id="secNewPassword" placeholder="Ej. 1234 o una palabra..." required>
+              <button type="button" class="btn-toggle-pwd-small" onclick="togglePasswordVisibility('secNewPassword', this)">👁️</button>
+            </div>
+            <small class="form-hint">Puede ser un PIN numérico (ej. 2486) o cualquier palabra.</small>
+          </div>
+
+          <div class="form-group">
+            <label for="secConfirmPassword">Confirmar Nueva Contraseña</label>
+            <input type="password" id="secConfirmPassword" placeholder="Repite la nueva contraseña" required>
+          </div>
+
+          <div id="secErrorMsg" class="form-error-msg" style="display: none;"></div>
+
+          <div class="modal-actions" style="margin-top: 18px;">
+            <button type="button" id="btnRemoveSecurity" class="btn btn-secondary" onclick="handleRemoveSecurity()" style="display: none;">
+              🔓 Desactivar
+            </button>
+            <button type="submit" class="btn btn-primary" id="btnSaveSecurity">
+              💾 Guardar Contraseña
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- PANTALLA DE BLOQUEO POR CONTRASEÑA         -->
+  <!-- ========================================== -->
+  <div id="lock-screen-overlay" class="lock-screen-overlay" style="display: none;">
+    <div class="lock-card">
+      <div class="lock-icon-badge">🔒</div>
+      <h2 class="lock-title">Mis Hobbies</h2>
+      <p class="lock-subtitle">Introduce tu contraseña para entrar a tu rincón personal</p>
+      
+      <form id="lockScreenForm" onsubmit="handleUnlockSubmit(event)">
+        <div class="lock-input-wrapper">
+          <input type="password" id="lockInputPassword" class="lock-password-input" 
+            placeholder="Contraseña o PIN..." autocomplete="current-password">
+          <button type="button" class="btn-toggle-pwd" onclick="togglePasswordVisibility('lockInputPassword', this)" title="Ver / Ocultar">
+            👁️
+          </button>
+        </div>
+        <div id="lockErrorMessage" class="lock-error-msg" style="display: none;"></div>
+        
+        <button type="submit" class="btn btn-primary btn-lock-submit">
+          ✨ Desbloquear
+        </button>
+      </form>
+
+      <button type="button" class="btn-forgot-pwd" onclick="handleForgotSecurityPassword()">
+        ¿Olvidaste tu contraseña?
+      </button>
+    </div>
+  </div>
+
   <!-- Modal Lightbox: Foto de Naturaleza ampliada -->
   <div id="nature-lightbox" class="nature-lightbox" onclick="closeNatureLightbox()">
     <button class="nature-lightbox-close" aria-label="Cerrar">&times;</button>
     <img id="nature-lightbox-img" class="nature-lightbox-img" src="" alt="Fotografía de Naturaleza">
   </div>
 
-  <!-- Scripts con versión 6.0 -->
-  <script src="nature-data.js?v=6"></script>
-  <script src="app.js?v=6"></script>
+  <!-- Scripts con versión 7.0 -->
+  <script src="nature-data.js?v=7"></script>
+  <script src="app.js?v=7"></script>
 
   <!-- Service Worker con actualización inmediata -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=6')
+        navigator.serviceWorker.register('./sw.js?v=7')
           .then((reg) => {
             console.log('Service Worker Cottagecore registrado:', reg.scope);
             // Comprobar actualizaciones
