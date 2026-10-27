@@ -18,7 +18,7 @@
   <link rel="apple-touch-icon" id="dynamicAppleIcon" href="icon-autumn.svg">
 
   <!-- Estilos visuales Cozy y Estacionales -->
-  <link rel="stylesheet" href="style.css?v=5">
+  <link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
 
@@ -50,26 +50,13 @@
   <main class="app-main">
 
     <!-- ========================================== -->
-    <!-- RINCÓN MÍSTICO: CICLO LUNAR & FRASE DEL DÍA -->
+    <!-- PESTAÑA PRINCIPAL: INICIO (HOME)           -->
+    <!-- Bloc de notas / Diario & Frase del día     -->
     <!-- ========================================== -->
-    <section class="cottagecore-daily-card">
-      <!-- Módulo del Ciclo Lunar de Hoy -->
-      <div class="lunar-widget">
-        <div class="lunar-orb-wrapper">
-          <span class="lunar-emoji" id="lunarEmoji">🌕</span>
-        </div>
-        <div class="lunar-details">
-          <div class="lunar-header">
-            <span class="lunar-tag">Ciclo Lunar de Hoy</span>
-            <span class="lunar-illumination" id="lunarIllum">88% iluminada</span>
-          </div>
-          <h3 class="lunar-name" id="lunarName">Luna Gibosa Creciente</h3>
-          <p class="lunar-counsel" id="lunarCounsel">Noche propicia para dar puntadas con calma y encender una vela aromática.</p>
-        </div>
-      </div>
+    <section id="tab-home" class="tab-content active">
 
-      <!-- Módulo de Frase Inspiradora Cottagecore -->
-      <div class="quote-widget">
+      <!-- 1. Módulo de Frase Inspiradora Cottagecore -->
+      <div class="quote-widget home-quote-widget">
         <div class="quote-header">
           <span class="quote-label">🌿 Pensamiento del Día</span>
           <button class="btn-refresh-quote" onclick="nextInspiringQuote()" title="Descubrir otra frase">
@@ -82,27 +69,70 @@
         <cite class="quote-author" id="quoteAuthor">— Virginia Woolf</cite>
       </div>
 
-      <!-- Módulo de Descubrimientos de Hoy: Planta/Hongo & Animal -->
-      <div class="daily-nature-preview-bar">
-        <button class="daily-preview-chip" onclick="navigateToNature('plant')" title="Toca para descubrir la Planta u Hongo de hoy">
-          <span class="daily-preview-icon" id="dailyPreviewPlantIcon">🍄</span>
-          <div class="daily-preview-info">
-            <span class="daily-preview-label">Planta / Hongo de hoy</span>
-            <span class="daily-preview-name" id="dailyPreviewPlantName">Amanita Muscaria</span>
+      <!-- 2. Bloc de Notas / Diario para escribir pensamientos -->
+      <div class="diary-widget">
+        <div class="diary-card-header">
+          <div class="diary-brand-title">
+            <span class="diary-main-icon">📖</span>
+            <div>
+              <h2 class="diary-heading">Mi Diario de Pensamientos</h2>
+              <span class="diary-subdate" id="diaryCurrentDate">Hoy</span>
+            </div>
           </div>
-        </button>
-        <button class="daily-preview-chip" onclick="navigateToNature('animal')" title="Toca para descubrir el Animal de hoy">
-          <span class="daily-preview-icon" id="dailyPreviewAnimalIcon">🦊</span>
-          <div class="daily-preview-info">
-            <span class="daily-preview-label">Animal de hoy</span>
-            <span class="daily-preview-name" id="dailyPreviewAnimalName">Zorro Rojo</span>
+          <div class="diary-actions-top">
+            <span class="diary-status-badge" id="diarySavedStatus">✨ Al día</span>
+            <button type="button" class="btn-diary-pill" onclick="startNewDiaryEntry()" title="Comenzar una nueva hoja en blanco">
+              ➕ Nueva hoja
+            </button>
           </div>
-        </button>
+        </div>
+
+        <!-- Lienzo de papel para escribir notas y reflexiones -->
+        <div class="diary-sheet">
+          <input type="text" id="diaryEntryTitle" class="diary-sheet-title" 
+            placeholder="Título o momento especial..." 
+            oninput="handleDiaryInput()">
+          
+          <textarea id="diaryEntryText" class="diary-sheet-textarea" 
+            placeholder="Escribe aquí tus pensamientos, reflexiones del día, agradecimientos o momentos de calma..." 
+            oninput="handleDiaryInput()"></textarea>
+
+          <div class="diary-sheet-footer">
+            <div class="diary-mood-bar">
+              <span class="diary-mood-caption">Sensación:</span>
+              <div class="diary-mood-pills">
+                <button type="button" class="btn-mood active" data-mood="☕" onclick="setDiaryMood('☕', this)" title="Calma & Té">☕</button>
+                <button type="button" class="btn-mood" data-mood="🍂" onclick="setDiaryMood('🍂', this)" title="Paz otoñal">🍂</button>
+                <button type="button" class="btn-mood" data-mood="🕯️" onclick="setDiaryMood('🕯️', this)" title="Recogimiento">🕯️</button>
+                <button type="button" class="btn-mood" data-mood="🌸" onclick="setDiaryMood('🌸', this)" title="Alegría dulce">🌸</button>
+                <button type="button" class="btn-mood" data-mood="✨" onclick="setDiaryMood('✨', this)" title="Inspiración">✨</button>
+              </div>
+            </div>
+            <button type="button" class="btn-diary-archive" onclick="saveCurrentDiaryEntry()" title="Guardar esta página en el diario">
+              💾 Guardar en el diario
+            </button>
+          </div>
+        </div>
+
+        <!-- Historial desplegable de pensamientos y páginas anteriores -->
+        <div class="diary-archive-container">
+          <button type="button" class="diary-archive-toggle" onclick="toggleDiaryHistory()">
+            <span class="diary-archive-toggle-text">
+              <span>📚</span>
+              <span>Páginas anteriores del diario (<strong id="diaryCount">0</strong>)</span>
+            </span>
+            <span id="diaryHistoryToggleIcon" class="diary-toggle-arrow">▾</span>
+          </button>
+          <div id="diary-history-list" class="diary-history-list" style="display: none;">
+            <!-- Renderizado dinámico de páginas del diario -->
+          </div>
+        </div>
       </div>
+
     </section>
 
-    <!-- PESTAÑA 1: CROCHET / TEJER -->
-    <section id="tab-crochet" class="tab-content active">
+    <!-- PESTAÑA 2: CROCHET / TEJER -->
+    <section id="tab-crochet" class="tab-content">
       <div class="banner-illustration-box">
         <img src="art-crochet.jpg" alt="Rincón de Lana y Agujas" class="banner-art-img">
         <div class="banner-art-overlay">
@@ -205,18 +235,33 @@
       </div>
     </section>
 
-    <!-- PESTAÑA 5: NATURALEZA Y FAUNA DIARIA (DOS NUEVOS APARTADOS) -->
+    <!-- PESTAÑA 6: NATURALEZA, FAUNA Y CICLO LUNAR -->
     <section id="tab-nature" class="tab-content">
       <div class="nature-hub-container">
         
+        <!-- Módulo del Ciclo Lunar de Hoy -->
+        <div class="lunar-widget nature-lunar-widget">
+          <div class="lunar-orb-wrapper">
+            <span class="lunar-emoji" id="lunarEmoji">🌕</span>
+          </div>
+          <div class="lunar-details">
+            <div class="lunar-header">
+              <span class="lunar-tag">Ciclo Lunar de Hoy</span>
+              <span class="lunar-illumination" id="lunarIllum">88% iluminada</span>
+            </div>
+            <h3 class="lunar-name" id="lunarName">Luna Gibosa Creciente</h3>
+            <p class="lunar-counsel" id="lunarCounsel">Noche propicia para dar puntadas con calma y encender una vela aromática.</p>
+          </div>
+        </div>
+
         <!-- Switcher superior: Planta/Hongo del Día vs Animal del Día -->
         <div class="nature-segmented-bar">
           <button id="btn-nature-plant" class="btn-nature-segment active" onclick="switchNatureSection('plant')">
-            <span>🍄</span>
+            <span class="nature-segment-icon">🍄</span>
             <span>Planta u Hongo del Día</span>
           </button>
           <button id="btn-nature-animal" class="btn-nature-segment" onclick="switchNatureSection('animal')">
-            <span>🦊</span>
+            <span class="nature-segment-icon">🦊</span>
             <span>Animal del Día</span>
           </button>
         </div>
@@ -247,7 +292,11 @@
 
   <!-- BARRA DE NAVEGACIÓN INFERIOR COZY -->
   <nav class="bottom-nav">
-    <button class="nav-item active" data-tab="tab-crochet">
+    <button class="nav-item active" data-tab="tab-home">
+      <span class="nav-icon">🏡</span>
+      <span class="nav-label">Inicio</span>
+    </button>
+    <button class="nav-item" data-tab="tab-crochet">
       <span class="nav-icon">🧶</span>
       <span class="nav-label">Tejer</span>
     </button>
@@ -560,15 +609,15 @@
     <img id="nature-lightbox-img" class="nature-lightbox-img" src="" alt="Fotografía de Naturaleza">
   </div>
 
-  <!-- Scripts con versión 5.0 -->
-  <script src="nature-data.js?v=5"></script>
-  <script src="app.js?v=5"></script>
+  <!-- Scripts con versión 6.0 -->
+  <script src="nature-data.js?v=6"></script>
+  <script src="app.js?v=6"></script>
 
   <!-- Service Worker con actualización inmediata -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=5')
+        navigator.serviceWorker.register('./sw.js?v=6')
           .then((reg) => {
             console.log('Service Worker Cottagecore registrado:', reg.scope);
             // Comprobar actualizaciones

@@ -1,4 +1,4 @@
-﻿// ========================================================
+// ========================================================
 // MIS HOBBIES - LÓGICA COZY & ADAPTACIÓN ESTACIONAL
 // ========================================================
 
@@ -46,6 +46,15 @@ let activeSeasonKey = 'autumn';
 
 // Estado global de la aplicación
 let appData = {
+  diary: {
+    currentDraft: {
+      title: '',
+      text: '',
+      mood: '☕',
+      lastSaved: null
+    },
+    entries: []
+  },
   crochet: [],
   diamond: [],
   reading: [],
@@ -54,6 +63,24 @@ let appData = {
 
 // Datos iniciales de ejemplo acogedores
 const initialSampleData = {
+  diary: {
+    currentDraft: {
+      title: 'Tarde de té y proyectos',
+      text: 'Hoy me he preparado un té de canela y manzana. Qué bien sienta tomarse un ratito para respirar, encender una vela y avanzar unas vueltas en mi labor con calma.',
+      mood: '☕',
+      lastSaved: new Date().toISOString()
+    },
+    entries: [
+      {
+        id: 'sample-diary-1',
+        date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+        dateFormatted: 'Ayer',
+        title: 'Pequeñas alegrías',
+        text: 'Pasear entre las hojas caídas y escuchar el crujido bajo las botas. La luz dorada del atardecer era mágica.',
+        mood: '🍂'
+      }
+    ]
+  },
   crochet: [
     {
       id: 'sample-crochet-1',
@@ -137,6 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadData();
   setupSeasonSystem();
   setupLunarAndQuoteWidget();
+  initDiarySystem();
   setupNavigation();
   setupBackupModal();
   setupStarRatingInput();
@@ -254,6 +282,15 @@ function loadData() {
       if (!Array.isArray(appData.diamond)) appData.diamond = [];
       if (!Array.isArray(appData.reading)) appData.reading = [];
       if (!Array.isArray(appData.plants)) appData.plants = JSON.parse(JSON.stringify(initialSampleData.plants));
+      if (!appData.diary) {
+        appData.diary = JSON.parse(JSON.stringify(initialSampleData.diary));
+      }
+      if (!appData.diary.currentDraft) {
+        appData.diary.currentDraft = { title: '', text: '', mood: '☕', lastSaved: null };
+      }
+      if (!Array.isArray(appData.diary.entries)) {
+        appData.diary.entries = [];
+      }
     } catch (e) {
       console.error('Error al leer datos:', e);
       appData = JSON.parse(JSON.stringify(initialSampleData));
@@ -417,12 +454,12 @@ function setupNavigation() {
 // RENDERIZADO GENERAL
 // ========================================================
 function renderAll() {
+  renderDiaryHistory();
   renderCrochet();
   renderDiamond();
   renderReading();
   renderPlants();
   renderNatureHub();
-  updateDailyNaturePreviews();
 }
 
 // ========================================================
@@ -1248,14 +1285,15 @@ function renderNatureHub() {
 }
 
 function renderPlantShowcase(container, item) {
+  const cleanType = (item.type || '').replace(/^🍄\s*|^🌿\s*|^🪴\s*/, '').trim();
   container.innerHTML = `
     <div class="nature-showcase-card">
       <div class="nature-hero-media" onclick="openNatureLightbox('${escapeHtml(item.photo)}')">
         <img src="${escapeHtml(item.photo)}" alt="${escapeHtml(item.name)}" class="nature-hero-img"
           onerror="this.onerror=null; this.src='icon-autumn.svg';">
         <div class="nature-media-badge">
-          <span>${item.fallbackIcon || '🍄'}</span>
-          <span>${escapeHtml(item.type)}</span>
+          <span class="nature-badge-icon">${item.fallbackIcon || '🍄'}</span>
+          <span class="nature-badge-type">${escapeHtml(cleanType || item.type)}</span>
         </div>
         <div class="nature-zoom-hint">🔍 Toca para ampliar foto</div>
       </div>
@@ -1325,14 +1363,15 @@ function renderPlantShowcase(container, item) {
 }
 
 function renderAnimalShowcase(container, item) {
+  const cleanType = (item.type || '').replace(/^🦊\s*|^🦔\s*|^🦉\s*|^🐿️\s*|^🐦\s*|^🦦\s*|^🦌\s*/, '').trim();
   container.innerHTML = `
     <div class="nature-showcase-card">
       <div class="nature-hero-media" onclick="openNatureLightbox('${escapeHtml(item.photo)}')">
         <img src="${escapeHtml(item.photo)}" alt="${escapeHtml(item.name)}" class="nature-hero-img"
           onerror="this.onerror=null; this.src='icon-autumn.svg';">
         <div class="nature-media-badge">
-          <span>${item.fallbackIcon || '🦊'}</span>
-          <span>${escapeHtml(item.type)}</span>
+          <span class="nature-badge-icon">${item.fallbackIcon || '🦊'}</span>
+          <span class="nature-badge-type">${escapeHtml(cleanType || item.type)}</span>
         </div>
         <div class="nature-zoom-hint">🔍 Toca para ampliar foto</div>
       </div>
@@ -1728,6 +1767,7 @@ function importDataBackup(event) {
       const imported = JSON.parse(e.target.result);
       if (imported && (imported.crochet || imported.diamond || imported.reading || imported.plants)) {
         appData = {
+          diary: imported.diary || JSON.parse(JSON.stringify(initialSampleData.diary)),
           crochet: Array.isArray(imported.crochet) ? imported.crochet : [],
           diamond: Array.isArray(imported.diamond) ? imported.diamond : [],
           reading: Array.isArray(imported.reading) ? imported.reading : [],
@@ -1755,4 +1795,279 @@ function escapeHtml(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+// ========================================================
+// PANTALLA DE INICIO: BLOC DE NOTAS & DIARIO DE PENSAMIENTOS
+// ========================================================
+let diaryDebounceTimer = null;
+
+function getCozyDateFormatted(date = new Date()) {
+  try {
+    const options = { weekday: 'long', day: 'numeric', month: 'long' };
+    const str = date.toLocaleDateString('es-ES', options);
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  } catch (e) {
+    return 'Hoy';
+  }
+}
+
+function initDiarySystem() {
+  const dateEl = document.getElementById('diaryCurrentDate');
+  if (dateEl) {
+    dateEl.textContent = getCozyDateFormatted();
+  }
+
+  if (!appData.diary) {
+    appData.diary = JSON.parse(JSON.stringify(initialSampleData.diary));
+  }
+  if (!appData.diary.currentDraft) {
+    appData.diary.currentDraft = { title: '', text: '', mood: '☕', lastSaved: null };
+  }
+  if (!Array.isArray(appData.diary.entries)) {
+    appData.diary.entries = [];
+  }
+
+  const titleInput = document.getElementById('diaryEntryTitle');
+  const textInput = document.getElementById('diaryEntryText');
+
+  if (titleInput && appData.diary.currentDraft) {
+    titleInput.value = appData.diary.currentDraft.title || '';
+  }
+  if (textInput && appData.diary.currentDraft) {
+    textInput.value = appData.diary.currentDraft.text || '';
+  }
+
+  const mood = (appData.diary.currentDraft && appData.diary.currentDraft.mood) || '☕';
+  document.querySelectorAll('.btn-mood').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-mood') === mood);
+  });
+
+  renderDiaryHistory();
+}
+
+function handleDiaryInput() {
+  const statusEl = document.getElementById('diarySavedStatus');
+  if (statusEl) {
+    statusEl.textContent = '✍️ Guardando...';
+    statusEl.style.opacity = '1';
+  }
+
+  clearTimeout(diaryDebounceTimer);
+  diaryDebounceTimer = setTimeout(() => {
+    const title = document.getElementById('diaryEntryTitle')?.value || '';
+    const text = document.getElementById('diaryEntryText')?.value || '';
+    const mood = appData.diary?.currentDraft?.mood || '☕';
+
+    if (!appData.diary) appData.diary = { currentDraft: {}, entries: [] };
+    appData.diary.currentDraft = {
+      title,
+      text,
+      mood,
+      lastSaved: new Date().toISOString()
+    };
+    saveData();
+
+    if (statusEl) {
+      statusEl.textContent = '✨ Guardado';
+      setTimeout(() => {
+        if (statusEl.textContent === '✨ Guardado') {
+          statusEl.style.opacity = '0.7';
+        }
+      }, 1500);
+    }
+  }, 350);
+}
+
+function setDiaryMood(mood, btnEl) {
+  if (!appData.diary) appData.diary = { currentDraft: {}, entries: [] };
+  if (!appData.diary.currentDraft) appData.diary.currentDraft = { title: '', text: '' };
+  appData.diary.currentDraft.mood = mood;
+
+  document.querySelectorAll('.btn-mood').forEach(b => {
+    b.classList.toggle('active', b.getAttribute('data-mood') === mood);
+  });
+
+  saveData();
+  vibratePhone(15);
+}
+
+function saveCurrentDiaryEntry() {
+  const titleInput = document.getElementById('diaryEntryTitle');
+  const textInput = document.getElementById('diaryEntryText');
+  const title = (titleInput?.value || '').trim();
+  const text = (textInput?.value || '').trim();
+  const mood = appData.diary?.currentDraft?.mood || '☕';
+
+  if (!title && !text) {
+    showCozyToast('✏️ Escribe primero algo en tu diario para guardarlo.');
+    return;
+  }
+
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  const newEntry = {
+    id: 'diary-' + Date.now(),
+    title: title || 'Reflexión del día',
+    text: text,
+    mood: mood,
+    date: now.toISOString(),
+    dateFormatted: getCozyDateFormatted(now) + ` a las ${timeStr}`
+  };
+
+  if (!appData.diary) appData.diary = { currentDraft: {}, entries: [] };
+  if (!Array.isArray(appData.diary.entries)) appData.diary.entries = [];
+  appData.diary.entries.unshift(newEntry);
+
+  // Reiniciar borrador actual para nueva hoja
+  appData.diary.currentDraft = { title: '', text: '', mood: '☕', lastSaved: null };
+  if (titleInput) titleInput.value = '';
+  if (textInput) textInput.value = '';
+
+  saveData();
+  renderDiaryHistory();
+  vibratePhone(30);
+
+  const statusEl = document.getElementById('diarySavedStatus');
+  if (statusEl) {
+    statusEl.textContent = '📖 Guardado en el diario';
+    statusEl.style.opacity = '1';
+    setTimeout(() => { statusEl.textContent = '✨ Al día'; }, 2200);
+  }
+
+  showCozyToast('📖 ¡Página guardada con amor en tu diario!');
+}
+
+function startNewDiaryEntry() {
+  const titleInput = document.getElementById('diaryEntryTitle');
+  const textInput = document.getElementById('diaryEntryText');
+  const title = (titleInput?.value || '').trim();
+  const text = (textInput?.value || '').trim();
+
+  if (title || text) {
+    if (confirm('¿Quieres guardar esta página en tu diario antes de abrir una hoja en blanco?')) {
+      saveCurrentDiaryEntry();
+      return;
+    }
+  }
+
+  if (titleInput) titleInput.value = '';
+  if (textInput) textInput.value = '';
+  if (appData.diary) {
+    appData.diary.currentDraft = { title: '', text: '', mood: '☕', lastSaved: null };
+    saveData();
+  }
+  if (titleInput) titleInput.focus();
+  vibratePhone(20);
+  showCozyToast('✨ Hoja en blanco lista para escribir.');
+}
+
+function renderDiaryHistory() {
+  const container = document.getElementById('diary-history-list');
+  const countEl = document.getElementById('diaryCount');
+  const entries = (appData.diary && Array.isArray(appData.diary.entries)) ? appData.diary.entries : [];
+
+  if (countEl) countEl.textContent = entries.length;
+  if (!container) return;
+
+  if (entries.length === 0) {
+    container.innerHTML = `
+      <div style="text-align:center; padding:18px 12px; color:var(--text-light); font-size:0.86rem; font-style:italic;">
+        Aún no has archivado páginas anteriores. Escribe tus pensamientos arriba y pulsa «Guardar en el diario».
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = entries.map(entry => `
+    <div class="diary-entry-card" id="${entry.id}">
+      <div class="diary-entry-top">
+        <div class="diary-entry-meta">
+          <span>${entry.mood || '☕'}</span>
+          <span>${escapeHtml(entry.dateFormatted || 'Página anterior')}</span>
+        </div>
+        <div class="diary-entry-actions">
+          <button class="btn-entry-action" onclick="loadDiaryEntryToEdit('${entry.id}')" title="Continuar escribiendo esta página">
+            ✏️ Editar
+          </button>
+          <button class="btn-entry-action delete" onclick="deleteDiaryEntry('${entry.id}')" title="Eliminar del diario">
+            🗑️
+          </button>
+        </div>
+      </div>
+      <div class="diary-entry-title">${escapeHtml(entry.title)}</div>
+      <div class="diary-entry-body">${escapeHtml(entry.text)}</div>
+    </div>
+  `).join('');
+}
+
+function toggleDiaryHistory() {
+  const container = document.getElementById('diary-history-list');
+  const icon = document.getElementById('diaryHistoryToggleIcon');
+  if (!container) return;
+
+  const isHidden = container.style.display === 'none' || container.style.display === '';
+  container.style.display = isHidden ? 'flex' : 'none';
+  if (icon) {
+    icon.classList.toggle('open', isHidden);
+  }
+  vibratePhone(15);
+}
+
+function loadDiaryEntryToEdit(id) {
+  const entry = appData.diary?.entries?.find(e => e.id === id);
+  if (!entry) return;
+
+  const titleInput = document.getElementById('diaryEntryTitle');
+  const textInput = document.getElementById('diaryEntryText');
+
+  if (titleInput) titleInput.value = entry.title || '';
+  if (textInput) textInput.value = entry.text || '';
+
+  setDiaryMood(entry.mood || '☕');
+
+  // Al editarla, se vuelve a cargar como borrador principal
+  appData.diary.entries = appData.diary.entries.filter(e => e.id !== id);
+  appData.diary.currentDraft = {
+    title: entry.title || '',
+    text: entry.text || '',
+    mood: entry.mood || '☕',
+    lastSaved: new Date().toISOString()
+  };
+  saveData();
+  renderDiaryHistory();
+
+  if (textInput) {
+    textInput.focus();
+    textInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  vibratePhone(25);
+  showCozyToast('✏️ Página cargada en el bloc de notas para editar.');
+}
+
+function deleteDiaryEntry(id) {
+  if (!confirm('¿Deseas eliminar esta página del diario?')) return;
+  if (!appData.diary || !Array.isArray(appData.diary.entries)) return;
+
+  appData.diary.entries = appData.diary.entries.filter(e => e.id !== id);
+  saveData();
+  renderDiaryHistory();
+  vibratePhone(25);
+  showCozyToast('🗑️ Página eliminada del diario.');
+}
+
+function showCozyToast(message) {
+  let toast = document.getElementById('cozy-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'cozy-toast';
+    toast.className = 'cozy-toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.classList.add('visible');
+  clearTimeout(toast._timeout);
+  toast._timeout = setTimeout(() => {
+    toast.classList.remove('visible');
+  }, 2400);
 }

@@ -485,6 +485,357 @@ h1, h2, h3, .serif-font {
 }
 
 /* ========================================================
+   PANTALLA DE INICIO: FRASE CÉLEBRE Y DIARIO DE PENSAMIENTOS
+   ======================================================== */
+.home-quote-widget {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-cozy);
+  position: relative;
+  overflow: hidden;
+  background-image: radial-gradient(circle at top right, rgba(233, 163, 75, 0.08), transparent 60%);
+}
+
+.diary-widget {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-cozy);
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.diary-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.diary-brand-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.diary-main-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.diary-heading {
+  font-family: var(--font-serif);
+  font-size: 1.24rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.diary-subdate {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  display: block;
+}
+
+.diary-actions-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.diary-status-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--accent-primary);
+  background: var(--bg-subtle);
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-subtle);
+  white-space: nowrap;
+  transition: all 0.25s ease;
+}
+
+.btn-diary-pill {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-pill);
+  padding: 5px 12px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-diary-pill:active {
+  transform: scale(0.94);
+  background-color: var(--accent-chip);
+}
+
+/* Lienzo de papel acogedor estilo diario personal */
+.diary-sheet {
+  background: var(--bg-app);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.02);
+  position: relative;
+}
+
+.diary-sheet-title {
+  width: 100%;
+  border: none;
+  border-bottom: 1.5px dashed var(--border-subtle);
+  background: transparent;
+  font-family: var(--font-serif);
+  font-size: 1.12rem;
+  font-weight: 700;
+  color: var(--text-main);
+  padding: 4px 0 10px 0;
+  margin-bottom: 12px;
+  outline: none;
+  border-radius: 0;
+}
+
+.diary-sheet-title::placeholder {
+  color: var(--text-light);
+  font-style: italic;
+  font-weight: normal;
+}
+
+.diary-sheet-textarea {
+  width: 100%;
+  min-height: 180px;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--text-main);
+  resize: vertical;
+  outline: none;
+  padding: 0;
+  border-radius: 0;
+  background-image: repeating-linear-gradient(transparent, transparent 27px, var(--border-subtle) 28px);
+  background-attachment: local;
+}
+
+.diary-sheet-textarea::placeholder {
+  color: var(--text-light);
+  font-style: italic;
+  line-height: 1.6;
+}
+
+.diary-sheet-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.diary-mood-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.diary-mood-caption {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.diary-mood-pills {
+  display: flex;
+  gap: 4px;
+}
+
+.btn-mood {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-mood:active {
+  transform: scale(0.9);
+}
+
+.btn-mood.active {
+  background: var(--accent-chip);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 2px var(--accent-primary);
+  transform: scale(1.1);
+}
+
+.btn-diary-archive {
+  background: var(--accent-primary);
+  color: #FFFFFF;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 8px 16px;
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px var(--accent-glow);
+  transition: all 0.15s ease;
+}
+
+.btn-diary-archive:active {
+  transform: scale(0.95);
+}
+
+/* Historial de entradas guardadas */
+.diary-archive-container {
+  margin-top: 16px;
+  border-top: 1px dashed var(--border-subtle);
+  padding-top: 12px;
+}
+
+.diary-archive-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 4px;
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.diary-archive-toggle-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.diary-toggle-arrow {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+}
+
+.diary-toggle-arrow.open {
+  transform: rotate(180deg);
+}
+
+.diary-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.diary-entry-card {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  position: relative;
+  transition: background-color 0.2s ease;
+}
+
+.diary-entry-card:hover {
+  background: var(--bg-card);
+}
+
+.diary-entry-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.diary-entry-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.diary-entry-title {
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+.diary-entry-body {
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--text-main);
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin-bottom: 8px;
+}
+
+.diary-entry-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.btn-entry-action {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-entry-action:active {
+  transform: scale(0.93);
+}
+
+.btn-entry-action.delete:hover {
+  color: #C0392B;
+  border-color: #E74C3C;
+}
+
+/* Ciclo Lunar dentro de la Pestaña Naturaleza */
+.nature-lunar-widget {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-cozy);
+  border-bottom: 1.5px solid var(--border-card);
+  background-image: radial-gradient(circle at top right, rgba(233, 163, 75, 0.09), transparent 60%);
+}
+
+/* ========================================================
    CABECERAS ILUSTRADAS COTTAGECORE POR AFICIÓN
    ======================================================== */
 .banner-illustration-box {
@@ -1148,16 +1499,20 @@ h1, h2, h3, .serif-font {
   -webkit-backdrop-filter: blur(18px);
   border-top: 1px solid var(--border-subtle);
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
   z-index: 100;
   max-width: 680px;
   margin: 0 auto;
   transition: background-color 0.4s ease, border-color 0.4s ease;
+  padding-left: 4px;
+  padding-right: 4px;
+  box-sizing: border-box;
 }
 
 .nav-item {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1165,7 +1520,7 @@ h1, h2, h3, .serif-font {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 8px 0;
+  padding: 6px 2px;
   color: var(--text-light);
   transition: color 0.2s, transform 0.12s;
 }
@@ -1175,15 +1530,20 @@ h1, h2, h3, .serif-font {
 }
 
 .nav-icon {
-  font-size: 1.55rem;
+  font-size: 1.3rem;
+  line-height: 1;
   margin-bottom: 2px;
   transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .nav-label {
-  font-size: 0.76rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.2px;
+  letter-spacing: 0.1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .nav-item.active {
@@ -1191,7 +1551,11 @@ h1, h2, h3, .serif-font {
 }
 
 .nav-item.active .nav-icon {
-  transform: translateY(-3px) scale(1.12);
+  transform: translateY(-2px) scale(1.1);
+}
+
+.nav-item[data-tab="tab-home"].active {
+  color: var(--accent-primary);
 }
 
 .nav-item[data-tab="tab-crochet"].active {
@@ -1211,7 +1575,7 @@ h1, h2, h3, .serif-font {
 }
 
 .nav-item[data-tab="tab-nature"].active {
-  color: var(--accent-primary);
+  color: var(--accent-secondary);
 }
 
 /* ========================================================
@@ -1870,13 +2234,14 @@ textarea:focus {
 
 .nature-media-badge {
   position: absolute;
-  top: 14px;
-  left: 14px;
-  background: rgba(28, 20, 15, 0.75);
+  top: 12px;
+  left: 12px;
+  max-width: calc(100% - 24px);
+  background: rgba(28, 20, 15, 0.78);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   color: #FFFFFF;
-  padding: 4px 12px;
+  padding: 5px 12px;
   border-radius: var(--radius-pill);
   font-size: 0.76rem;
   font-weight: 700;
@@ -1884,6 +2249,21 @@ textarea:focus {
   align-items: center;
   gap: 6px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  box-sizing: border-box;
+  overflow: hidden;
+  z-index: 2;
+}
+
+.nature-badge-icon {
+  font-size: 0.95rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.nature-badge-type {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .nature-zoom-hint {
@@ -2071,5 +2451,34 @@ textarea:focus {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Toast de notificación Cozy */
+.cozy-toast {
+  position: fixed;
+  bottom: calc(var(--bottom-nav-height) + 20px);
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(45, 34, 27, 0.94);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #FFFFFF;
+  padding: 10px 18px;
+  border-radius: var(--radius-pill);
+  font-size: 0.82rem;
+  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 250;
+  white-space: nowrap;
+  max-width: 90%;
+  text-align: center;
+}
+
+.cozy-toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
