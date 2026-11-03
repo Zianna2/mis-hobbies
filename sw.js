@@ -1,5 +1,5 @@
-// Service Worker para Mis Hobbies PWA - Versión Cozy Cottagecore 7.0
-const CACHE_NAME = 'hobbies-pwa-v7';
+// Service Worker para Mis Hobbies PWA - Versión Cozy Cottagecore 8.0 (Novedades Lectura: Audiolibros, Por Leer y Top España)
+const CACHE_NAME = 'hobbies-pwa-v8';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
