@@ -3003,3 +3003,496 @@ textarea:focus {
   border-radius: var(--radius-sm);
 }
 
+
+/* ========================================================
+   NOVEDADES LECTURA: SUBNAVEGACIÓN, AUDIOLIBROS,
+   LISTA DE DESEOS (POR LEER) Y TOP ESPAÑA
+   ======================================================== */
+
+.reading-subnav-bar {
+  display: flex;
+  gap: 8px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-card);
+  border-radius: var(--radius-pill);
+  padding: 6px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-cozy);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.reading-subnav-btn {
+  flex: 1;
+  min-width: 105px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  white-space: nowrap;
+}
+
+.reading-subnav-btn.active {
+  background: var(--reading-color);
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(107, 122, 161, 0.35);
+  transform: scale(1.02);
+}
+
+.subnav-icon {
+  font-size: 1rem;
+}
+
+.subnav-badge {
+  font-size: 0.7rem;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-subtle);
+  color: var(--text-main);
+  font-weight: 800;
+}
+
+.reading-subnav-btn.active .subnav-badge {
+  background: rgba(255, 255, 255, 0.25);
+  color: #FFFFFF;
+}
+
+.subnav-badge.pulse {
+  background: var(--accent-primary);
+  color: #FFFFFF;
+  animation: cozyPulse 2s infinite ease-in-out;
+}
+
+@keyframes cozyPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* Selector de formato en el modal (Libro vs Audiolibro) */
+.format-toggle-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.format-choice-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 12px 10px;
+  border: 2px solid var(--border-card);
+  border-radius: var(--radius-md);
+  background: var(--bg-subtle);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.format-choice-btn:active {
+  transform: scale(0.96);
+}
+
+.format-choice-btn.active {
+  border-color: var(--reading-color);
+  background: var(--bg-card);
+  box-shadow: 0 4px 14px rgba(107, 122, 161, 0.2);
+}
+
+.format-choice-btn .format-icon {
+  font-size: 1.8rem;
+  margin-bottom: 4px;
+}
+
+.format-choice-btn .format-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.format-choice-btn .format-desc {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.field-hint {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+  line-height: 1.35;
+}
+
+.custom-select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--border-card);
+  border-radius: var(--radius-md);
+  background: var(--bg-subtle);
+  font-size: 0.95rem;
+  color: var(--text-main);
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.custom-select:focus {
+  border-color: var(--reading-color);
+  background-color: #FFFFFF;
+}
+
+/* Tarjeta específica para Audiolibros */
+.audiobook-box {
+  background: linear-gradient(135deg, var(--reading-bg) 0%, #FFFFFF 100%);
+  border: 1.5px solid var(--reading-border);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  margin-bottom: 16px;
+}
+
+.audiobook-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.audiobook-badge-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--reading-color);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.audiobook-duration-pill {
+  font-size: 0.76rem;
+  background: #FFFFFF;
+  border: 1px solid var(--reading-border);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.audio-slider-controls {
+  margin: 12px 0 10px 0;
+}
+
+.audio-quick-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.btn-audio-step {
+  flex: 1;
+  background-color: #FFFFFF;
+  border: 1px solid var(--reading-border);
+  color: var(--reading-color);
+  padding: 8px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.btn-audio-step:active {
+  transform: scale(0.93);
+  background-color: var(--reading-bg);
+}
+
+.badge-format-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  margin-right: 6px;
+}
+
+.badge-format-pill.book {
+  background: #EFF3FA;
+  color: #3C4E75;
+  border: 1px solid #D1DCF0;
+}
+
+.badge-format-pill.audio {
+  background: #F3EEF9;
+  color: #6C488C;
+  border: 1px solid #DFD0EF;
+}
+
+/* ========================================================
+   SECCIÓN 2: LISTA DE DESEOS / LIBROS POR LEER (WISHLIST)
+   ======================================================== */
+.wishlist-header-banner {
+  background: linear-gradient(135deg, #FBF8F3 0%, #F5EDE1 100%);
+  border: 1.5px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: var(--shadow-cozy);
+}
+
+.wishlist-banner-info h3 {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 2px;
+}
+
+.wishlist-banner-info p {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.wishlist-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-cozy);
+  position: relative;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.wishlist-card:active {
+  transform: scale(0.99);
+}
+
+.wishlist-card-content {
+  margin-bottom: 14px;
+}
+
+.wishlist-book-title {
+  font-family: var(--font-serif);
+  font-size: 1.22rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.25;
+}
+
+.wishlist-book-author {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.wishlist-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0;
+}
+
+.wishlist-notes-box {
+  background: var(--bg-subtle);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  color: var(--text-main);
+  line-height: 1.4;
+  border-left: 3px solid var(--reading-color);
+  margin-top: 8px;
+}
+
+.wishlist-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-card);
+}
+
+.btn-start-reading {
+  flex: 1;
+  background-color: var(--reading-color);
+  color: #FFFFFF;
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  border: none;
+  font-weight: 700;
+  font-size: 0.88rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(107, 122, 161, 0.3);
+  transition: transform 0.1s;
+}
+
+.btn-start-reading:active {
+  transform: scale(0.96);
+}
+
+/* ========================================================
+   SECCIÓN 3: TOP RECOMENDACIONES DE ESPAÑA (ACTUALIZABLE)
+   ======================================================== */
+.recs-header-banner {
+  background: linear-gradient(135deg, #FAF4ED 0%, #F5EAE0 100%);
+  border: 1.5px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-cozy);
+}
+
+.recs-banner-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.recs-banner-badge span {
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--accent-primary);
+}
+
+.recs-week-tag {
+  background: var(--accent-primary);
+  color: #FFFFFF !important;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 0.72rem !important;
+  font-weight: 800;
+}
+
+.recs-banner-title {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.25;
+  margin-bottom: 4px;
+}
+
+.recs-banner-desc {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin-bottom: 14px;
+}
+
+.recs-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.rec-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  box-shadow: var(--shadow-cozy);
+  position: relative;
+  overflow: hidden;
+}
+
+.rec-rank-ribbon {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, #FFF6E5 0%, #FDEACB 100%);
+  color: #975A16;
+  border: 1px solid #FBD38D;
+  font-size: 0.74rem;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 10px;
+}
+
+.rec-title {
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.25;
+}
+
+.rec-author {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 3px 0 10px 0;
+  font-weight: 500;
+}
+
+.rec-synopsis {
+  font-size: 0.88rem;
+  color: var(--text-main);
+  line-height: 1.55;
+  margin-bottom: 14px;
+}
+
+.rec-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border-card);
+}
+
+.rec-badges-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.btn-add-rec {
+  background: var(--bg-subtle);
+  border: 1.5px solid var(--border-card);
+  color: var(--text-main);
+  padding: 9px 16px;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  font-size: 0.84rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.btn-add-rec:active {
+  transform: scale(0.95);
+}
+
+.btn-add-rec.added {
+  background: #EBF8FF;
+  border-color: #90CDF4;
+  color: #2B6CB0;
+}
