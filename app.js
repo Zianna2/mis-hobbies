@@ -58,6 +58,7 @@ let appData = {
   crochet: [],
   diamond: [],
   reading: [],
+  readingWishlist: [],
   plants: []
 };
 
@@ -108,10 +109,50 @@ const initialSampleData = {
       id: 'sample-reading-1',
       title: 'La biblioteca de la medianoche',
       author: 'Matt Haig',
+      format: 'book',
       currentPage: 145,
       totalPages: 330,
       rating: 5,
       quotes: '«Nunca subestimes la gran importancia de las cosas pequeñas». Una lectura preciosa para una tarde tranquila.'
+    },
+    {
+      id: 'sample-reading-2',
+      title: 'El susurro del fuego',
+      author: 'Javier Castillo',
+      format: 'audiobook',
+      audioProgress: 45,
+      audioDuration: '10h 20m',
+      rating: 5,
+      quotes: 'Escuchado con auriculares mientras paseo al atardecer. La narración sonora y los giros te atrapan por completo.'
+    }
+  ],
+  readingWishlist: [
+    {
+      id: 'sample-wish-1',
+      title: 'La península de las casas vacías',
+      author: 'David Uclés',
+      genre: 'Ficción histórica / Realismo mágico',
+      format: 'book',
+      notes: 'Gran fenómeno en las librerías independientes de España. Una epopeya mágica, poética y conmovedora.',
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 'sample-wish-2',
+      title: 'Por si un día volvemos',
+      author: 'María Dueñas',
+      genre: 'Ficción de época',
+      format: 'book',
+      notes: 'La nueva novela de la autora de El tiempo entre costuras; ideal para disfrutar con calma.',
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 'sample-wish-3',
+      title: 'Un animal salvaje',
+      author: 'Joël Dicker',
+      genre: 'Thriller psicológico',
+      format: 'audiobook',
+      notes: 'Nº 1 en ventas en España; recomendadísimo para escuchar en audiolibro.',
+      createdAt: new Date().toISOString()
     }
   ],
   plants: [
@@ -282,6 +323,7 @@ function loadData() {
       if (!Array.isArray(appData.crochet)) appData.crochet = [];
       if (!Array.isArray(appData.diamond)) appData.diamond = [];
       if (!Array.isArray(appData.reading)) appData.reading = [];
+      if (!Array.isArray(appData.readingWishlist)) appData.readingWishlist = JSON.parse(JSON.stringify(initialSampleData.readingWishlist || []));
       if (!Array.isArray(appData.plants)) appData.plants = JSON.parse(JSON.stringify(initialSampleData.plants));
       if (!appData.diary) {
         appData.diary = JSON.parse(JSON.stringify(initialSampleData.diary));
@@ -748,96 +790,730 @@ function updateDiamondCodes(id, value) {
 }
 
 // ========================================================
-// 3. SECCIÓN LECTURA & LIBROS
+// 3. SECCIÓN LECTURA & LIBROS, AUDIOLIBROS, WISHLIST Y TOP ESPAÑA
 // ========================================================
+
+let currentReadingSubnav = 'active'; // 'active', 'wishlist', 'recs'
+let currentRecFilter = 'all';
+
+function switchReadingSubnav(subview) {
+  currentReadingSubnav = subview;
+
+  // Actualizar botones de subnavegación
+  document.querySelectorAll('.reading-subnav-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById(`btn-reading-sub-${subview}`);
+  if (btn) btn.classList.add('active');
+
+  // Actualizar sub-vistas
+  const views = ['active', 'wishlist', 'recs'];
+  views.forEach(v => {
+    const el = document.getElementById(`reading-subview-${v}`);
+    if (el) {
+      if (v === subview) {
+        el.style.display = 'block';
+        el.classList.add('active');
+      } else {
+        el.style.display = 'none';
+        el.classList.remove('active');
+      }
+    }
+  });
+
+  vibratePhone(16);
+  renderReading();
+}
+
+function setReadingFormat(format) {
+  const hiddenInput = document.getElementById('reading-format');
+  if (hiddenInput) hiddenInput.value = format;
+
+  const btnBook = document.getElementById('btn-format-book');
+  const btnAudio = document.getElementById('btn-format-audiobook');
+  const fieldsBook = document.getElementById('fields-book-pages');
+  const fieldsAudio = document.getElementById('fields-audiobook-progress');
+  const totalPagesInput = document.getElementById('reading-total-pages');
+
+  if (format === 'audiobook') {
+    if (btnAudio) btnAudio.classList.add('active');
+    if (btnBook) btnBook.classList.remove('active');
+    if (fieldsBook) fieldsBook.style.display = 'none';
+    if (fieldsAudio) fieldsAudio.style.display = 'block';
+    if (totalPagesInput) totalPagesInput.required = false;
+  } else {
+    if (btnBook) btnBook.classList.add('active');
+    if (btnAudio) btnAudio.classList.remove('active');
+    if (fieldsBook) fieldsBook.style.display = 'flex';
+    if (fieldsAudio) fieldsAudio.style.display = 'none';
+    if (totalPagesInput) totalPagesInput.required = true;
+  }
+}
+
 function renderReading() {
+  // 1. Actualizar contadores en la barra de pestañas
+  const readingCountEl = document.getElementById('badge-reading-count');
+  const wishlistCountEl = document.getElementById('badge-wishlist-count');
+  if (readingCountEl) readingCountEl.textContent = (appData.reading || []).length;
+  if (wishlistCountEl) wishlistCountEl.textContent = (appData.readingWishlist || []).length;
+
+  // 2. Renderizar lecturas activas y audiolibros
+  renderActiveReadings();
+
+  // 3. Renderizar lista de deseos (libros por leer)
+  renderReadingWishlist();
+
+  // 4. Renderizar recomendaciones semanales de España
+  renderSpainRecommendations();
+}
+
+function renderActiveReadings() {
   const container = document.getElementById('reading-list');
   if (!container) return;
 
-  if (appData.reading.length === 0) {
+  if (!appData.reading || appData.reading.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
         <span class="empty-state-icon">📚</span>
         <h4>Tu estantería de lecturas está vacía</h4>
-        <p>Añade tu libro actual para acompañarlo de una taza y ver tus avances.</p>
-        <button class="btn btn-primary" onclick="openNewProjectModal('reading')">+ Añadir Primer Libro</button>
+        <p>Añade tu libro o audiolibro actual para acompañarlo de una taza caliente y registrar tus avances.</p>
+        <button class="btn btn-primary" onclick="openNewProjectModal('reading')">+ Añadir Primer Libro / Audio</button>
       </div>
     `;
     return;
   }
 
   container.innerHTML = appData.reading.map(p => {
-    const cur = Number(p.currentPage) || 0;
-    const total = Math.max(1, Number(p.totalPages) || 1);
-    const percent = Math.min(100, Math.round((cur / total) * 100));
-    const isFinished = cur >= total;
+    const isAudio = p.format === 'audiobook';
+
+    if (isAudio) {
+      // --- RENDERIZADO DE AUDIOLIBRO (SIN PÁGINAS) ---
+      const progress = Math.min(100, Math.max(0, Number(p.audioProgress) || 0));
+      const isFinished = progress >= 100;
+
+      return `
+        <div class="project-card" data-id="${p.id}">
+          <div class="card-top-bar">
+            <div class="card-title-group">
+              <h3>${escapeHtml(p.title)}</h3>
+              <div class="card-subtitle">
+                <span class="badge-format-pill audio">🎧 Audiolibro</span>
+                ${p.author ? 'de ' + escapeHtml(p.author) : ''}
+                ${isFinished ? '· <span class="badge-complete">🏆 ¡Escuchado!</span>' : ''}
+              </div>
+            </div>
+            <div class="card-actions">
+              <button class="btn-delete-card" title="Eliminar audiolibro" onclick="deleteProject('reading', '${p.id}')">🗑️</button>
+            </div>
+          </div>
+
+          <!-- CAJA DE PROGRESO DE AUDIOLIBRO (SIN PÁGINAS) -->
+          <div class="audiobook-box">
+            <div class="audiobook-header">
+              <span class="audiobook-badge-icon">🎧 Progreso de Escucha: <strong>${progress}%</strong></span>
+              ${p.audioDuration ? `<span class="audiobook-duration-pill">⏱️ ${escapeHtml(p.audioDuration)}</span>` : ''}
+            </div>
+
+            <div class="progress-track" style="margin-bottom: 12px;">
+              <div class="progress-fill fill-reading" style="width: ${progress}%;"></div>
+            </div>
+
+            <!-- Deslizador táctil suave para audio -->
+            <input type="range" class="range-slider" min="0" max="100" value="${progress}"
+              oninput="handleAudioSliderInput('${p.id}', this.value)"
+              onchange="handleAudioSliderChange('${p.id}', this.value)">
+
+            <!-- Botones de avance de audio sin páginas -->
+            <div class="audio-quick-buttons">
+              <button class="btn-audio-step" onclick="updateAudiobookProgress('${p.id}', -10)">-10%</button>
+              <button class="btn-audio-step" onclick="updateAudiobookProgress('${p.id}', 10)">+10%</button>
+              <button class="btn-audio-step" onclick="updateAudiobookProgress('${p.id}', 25)">+25%</button>
+              <button class="btn-audio-step" onclick="setAudiobookProgress('${p.id}', 100)">💯 ¡Terminado!</button>
+            </div>
+
+            <!-- Valoración con estrellas -->
+            <div style="margin-top: 14px;">
+              <span style="font-size:0.82rem; font-weight:700; color:var(--text-muted);">Tu valoración de la narración:</span>
+              <div class="star-rating" title="Toca las estrellas para calificar">
+                ${[1, 2, 3, 4, 5].map(starNum => `
+                  <span class="star ${starNum <= (p.rating || 0) ? 'filled' : ''}" 
+                    onclick="setBookRating('${p.id}', ${starNum})">★</span>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+
+          <!-- REFLEXIONES / CITAS -->
+          <div class="notes-section">
+            <div class="notes-label">
+              <span>☕ Citas y Reflexiones de la Escucha</span>
+              <small style="opacity:0.6;">(Auto-guardado)</small>
+            </div>
+            <textarea class="notes-textarea" placeholder="Frases hermosas, reflexiones sobre la voz narradora..." 
+              onchange="updateNotes('reading', '${p.id}', this.value)"
+              oninput="debouncedNotes('reading', '${p.id}', this.value)">${escapeHtml(p.quotes || '')}</textarea>
+          </div>
+        </div>
+      `;
+    } else {
+      // --- RENDERIZADO DE LIBRO FÍSICO / EBOOK (CON PÁGINAS) ---
+      const cur = Number(p.currentPage) || 0;
+      const total = Math.max(1, Number(p.totalPages) || 1);
+      const percent = Math.min(100, Math.round((cur / total) * 100));
+      const isFinished = cur >= total;
+
+      return `
+        <div class="project-card" data-id="${p.id}">
+          <div class="card-top-bar">
+            <div class="card-title-group">
+              <h3>${escapeHtml(p.title)}</h3>
+              <div class="card-subtitle">
+                <span class="badge-format-pill book">📖 Libro</span>
+                ${p.author ? 'de ' + escapeHtml(p.author) : ''} 
+                ${isFinished ? '· <span class="badge-complete">📖 ¡Leído!</span>' : ''}
+              </div>
+            </div>
+            <div class="card-actions">
+              <button class="btn-delete-card" title="Eliminar libro" onclick="deleteProject('reading', '${p.id}')">🗑️</button>
+            </div>
+          </div>
+
+          <!-- CAJA DE PROGRESO DE PÁGINAS -->
+          <div class="reading-box">
+            <div class="progress-header">
+              <span>Página <strong>${cur}</strong> de <strong>${total}</strong></span>
+              <strong>${percent}%</strong>
+            </div>
+
+            <div class="progress-track">
+              <div class="progress-fill fill-reading" style="width: ${percent}%;"></div>
+            </div>
+
+            <div class="reading-page-controls">
+              <div class="page-input-wrapper">
+                <span>Pág:</span>
+                <input type="number" class="page-input" min="0" max="${total}" value="${cur}"
+                  onchange="handleDirectPageChange('${p.id}', this.value, ${total})">
+                <span class="page-total-label">/ ${total}</span>
+              </div>
+
+              <div class="reading-buttons-row">
+                <button class="btn-reading-step" onclick="updateReadingPage('${p.id}', -1, ${total})">-1</button>
+                <button class="btn-reading-step" onclick="updateReadingPage('${p.id}', 1, ${total})">+1</button>
+                <button class="btn-reading-step" onclick="updateReadingPage('${p.id}', 5, ${total})">+5</button>
+                <button class="btn-reading-step" onclick="updateReadingPage('${p.id}', 10, ${total})">+10</button>
+              </div>
+            </div>
+
+            <div>
+              <span style="font-size:0.82rem; font-weight:700; color:var(--text-muted);">Tu valoración:</span>
+              <div class="star-rating" title="Toca las estrellas para calificar">
+                ${[1, 2, 3, 4, 5].map(starNum => `
+                  <span class="star ${starNum <= (p.rating || 0) ? 'filled' : ''}" 
+                    onclick="setBookRating('${p.id}', ${starNum})">★</span>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+
+          <!-- CITAS FAVORITAS -->
+          <div class="notes-section">
+            <div class="notes-label">
+              <span>☕ Citas y Reflexiones</span>
+              <small style="opacity:0.6;">(Auto-guardado)</small>
+            </div>
+            <textarea class="notes-textarea" placeholder="Escribe aquí las frases que te conmovieron o apuntes del libro..." 
+              onchange="updateNotes('reading', '${p.id}', this.value)"
+              oninput="debouncedNotes('reading', '${p.id}', this.value)">${escapeHtml(p.quotes || '')}</textarea>
+          </div>
+        </div>
+      `;
+    }
+  }).join('');
+}
+
+// Handlers de progreso de audiolibro
+function handleAudioSliderInput(id, val) {
+  const p = appData.reading.find(x => x.id === id);
+  if (p) {
+    p.audioProgress = parseInt(val, 10);
+    const card = document.querySelector(`.project-card[data-id="${id}"]`);
+    if (card) {
+      const strong = card.querySelector('.audiobook-badge-icon strong');
+      const fill = card.querySelector('.progress-fill');
+      if (strong) strong.textContent = `${p.audioProgress}%`;
+      if (fill) fill.style.width = `${p.audioProgress}%`;
+    }
+  }
+}
+
+function handleAudioSliderChange(id, val) {
+  const p = appData.reading.find(x => x.id === id);
+  if (p) {
+    p.audioProgress = parseInt(val, 10);
+    saveData();
+    vibratePhone(20);
+    renderActiveReadings();
+  }
+}
+
+function updateAudiobookProgress(id, delta) {
+  const p = appData.reading.find(x => x.id === id);
+  if (!p) return;
+  p.audioProgress = Math.min(100, Math.max(0, (Number(p.audioProgress) || 0) + delta));
+  saveData();
+  vibratePhone(22);
+  renderActiveReadings();
+}
+
+function setAudiobookProgress(id, val) {
+  const p = appData.reading.find(x => x.id === id);
+  if (!p) return;
+  p.audioProgress = val;
+  saveData();
+  vibratePhone(40);
+  renderActiveReadings();
+}
+
+// ========================================================
+// RENDERIZADO: LISTA DE DESEOS (LIBROS POR LEER)
+// ========================================================
+function renderReadingWishlist() {
+  const container = document.getElementById('reading-wishlist-container');
+  if (!container) return;
+
+  const list = appData.readingWishlist || [];
+  if (list.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <span class="empty-state-icon">🔖</span>
+        <h4>Tu lista de libros por leer está vacía</h4>
+        <p>Apunta aquí libros que quieres leer o añade los más leídos de España desde la pestaña «Top España».</p>
+        <button class="btn btn-primary" onclick="openWishlistModal()">+ Añadir a Por Leer</button>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = list.map(item => {
+    const isAudio = item.format === 'audiobook';
+    const isIndifferent = item.format === 'any';
+    let formatTag = '<span class="badge-format-pill book">📖 Papel / eBook</span>';
+    if (isAudio) formatTag = '<span class="badge-format-pill audio">🎧 Audiolibro</span>';
+    if (isIndifferent) formatTag = '<span class="badge-format-pill" style="background:#FFF8E7; color:#B7791F; border:1px solid #F6E05E;">✨ Papel o Audio</span>';
 
     return `
-      <div class="project-card" data-id="${p.id}">
-        <div class="card-top-bar">
-          <div class="card-title-group">
-            <h3>${escapeHtml(p.title)}</h3>
-            <span class="card-subtitle">
-              ${p.author ? 'de ' + escapeHtml(p.author) : ''} 
-              ${isFinished ? '· <span class="badge-complete">📖 ¡Leído!</span>' : ''}
-            </span>
+      <div class="wishlist-card" data-id="${item.id}">
+        <div class="wishlist-card-content">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+            <div>
+              <h3 class="wishlist-book-title">${escapeHtml(item.title)}</h3>
+              <div class="wishlist-book-author">${item.author ? 'de ' + escapeHtml(item.author) : ''}</div>
+            </div>
+            <button class="btn-delete-card" title="Eliminar de la lista" onclick="deleteWishlistItem('${item.id}')">🗑️</button>
           </div>
-          <div class="card-actions">
-            <button class="btn-delete-card" title="Eliminar libro" onclick="deleteProject('reading', '${p.id}')">🗑️</button>
+
+          <div class="wishlist-tags-row">
+            ${formatTag}
+            ${item.genre ? `<span class="chip">🏷️ ${escapeHtml(item.genre)}</span>` : ''}
           </div>
+
+          ${item.notes ? `
+            <div class="wishlist-notes-box">
+              <strong>Motivo / Nota:</strong> ${escapeHtml(item.notes)}
+            </div>
+          ` : ''}
         </div>
 
-        <!-- CAJA DE PROGRESO DE LECTURA -->
-        <div class="reading-box">
-          <div class="progress-header">
-            <span>Página <strong>${cur}</strong> de <strong>${total}</strong></span>
-            <strong>${percent}%</strong>
-          </div>
-
-          <div class="progress-track">
-            <div class="progress-fill fill-reading" style="width: ${percent}%;"></div>
-          </div>
-
-          <div class="reading-page-controls">
-            <div class="page-input-wrapper">
-              <span>Pág:</span>
-              <input type="number" class="page-input" min="0" max="${total}" value="${cur}"
-                onchange="handleDirectPageChange('${p.id}', this.value, ${total})">
-              <span class="page-total-label">/ ${total}</span>
-            </div>
-
-            <div class="reading-buttons-row">
-              <button class="btn-reading-step" onclick="updateReadingPage('${p.id}', -1, ${total})">-1</button>
-              <button class="btn-reading-step" onclick="updateReadingPage('${p.id}', 1, ${total})">+1</button>
-              <button class="btn-reading-step" onclick="updateReadingPage('${p.id}', 5, ${total})">+5</button>
-              <button class="btn-reading-step" onclick="updateReadingPage('${p.id}', 10, ${total})">+10</button>
-            </div>
-          </div>
-
-          <div>
-            <span style="font-size:0.82rem; font-weight:700; color:var(--text-muted);">Tu valoración:</span>
-            <div class="star-rating" title="Toca las estrellas para calificar">
-              ${[1, 2, 3, 4, 5].map(starNum => `
-                <span class="star ${starNum <= (p.rating || 0) ? 'filled' : ''}" 
-                  onclick="setBookRating('${p.id}', ${starNum})">★</span>
-              `).join('')}
-            </div>
-          </div>
-        </div>
-
-        <!-- CITAS FAVORITAS -->
-        <div class="notes-section">
-          <div class="notes-label">
-            <span>☕ Citas y Reflexiones</span>
-            <small style="opacity:0.6;">(Auto-guardado)</small>
-          </div>
-          <textarea class="notes-textarea" placeholder="Escribe aquí las frases que te conmovieron o apuntes del libro..." 
-            onchange="updateNotes('reading', '${p.id}', this.value)"
-            oninput="debouncedNotes('reading', '${p.id}', this.value)">${escapeHtml(p.quotes || '')}</textarea>
+        <div class="wishlist-actions-row">
+          <button class="btn-start-reading" onclick="startReadingFromWishlist('${item.id}')">
+            <span>${isAudio ? '🎧' : '📖'}</span>
+            <span>Comenzar a ${isAudio ? 'escuchar' : 'leer'} ahora</span>
+          </button>
         </div>
       </div>
     `;
   }).join('');
+}
+
+function openWishlistModal() {
+  document.getElementById('form-wishlist').reset();
+  const modal = document.getElementById('modal-wishlist');
+  if (modal) {
+    modal.classList.add('open');
+    const first = modal.querySelector('input');
+    if (first) setTimeout(() => first.focus(), 100);
+  }
+}
+
+function handleSaveWishlist(e) {
+  e.preventDefault();
+  const title = document.getElementById('wishlist-title').value.trim();
+  const author = document.getElementById('wishlist-author').value.trim();
+  const genre = document.getElementById('wishlist-genre').value.trim();
+  const format = document.getElementById('wishlist-format').value || 'book';
+  const notes = document.getElementById('wishlist-notes').value.trim();
+
+  if (!title) return;
+
+  const newItem = {
+    id: 'wish-' + Date.now(),
+    title,
+    author,
+    genre,
+    format,
+    notes,
+    createdAt: new Date().toISOString()
+  };
+
+  if (!Array.isArray(appData.readingWishlist)) appData.readingWishlist = [];
+  appData.readingWishlist.unshift(newItem);
+  saveData();
+  renderReading();
+  closeModal('modal-wishlist');
+  vibratePhone(30);
+}
+
+function deleteWishlistItem(id) {
+  if (confirm('¿Deseas quitar este libro de tu lista de libros por leer?')) {
+    appData.readingWishlist = (appData.readingWishlist || []).filter(x => x.id !== id);
+    saveData();
+    vibratePhone(30);
+    renderReading();
+  }
+}
+
+function startReadingFromWishlist(id) {
+  const item = (appData.readingWishlist || []).find(x => x.id === id);
+  if (!item) return;
+
+  const isAudio = item.format === 'audiobook';
+
+  const newReading = {
+    id: 'reading-' + Date.now(),
+    title: item.title,
+    author: item.author,
+    format: isAudio ? 'audiobook' : 'book',
+    rating: 0,
+    quotes: item.notes ? `Nota inicial: ${item.notes}` : '',
+    createdAt: new Date().toISOString()
+  };
+
+  if (isAudio) {
+    newReading.audioProgress = 0;
+    newReading.audioDuration = '';
+  } else {
+    newReading.currentPage = 0;
+    newReading.totalPages = 350; // valor inicial editable
+  }
+
+  // Añadir a lecturas activas y quitar de pendientes
+  appData.reading.unshift(newReading);
+  appData.readingWishlist = appData.readingWishlist.filter(x => x.id !== id);
+  saveData();
+
+  // Cambiar a la pestaña de lecturas activas
+  switchReadingSubnav('active');
+  vibratePhone(45);
+}
+
+// ========================================================
+// RENDERIZADO: RECOMENDACIONES SEMANALES DE ESPAÑA
+// ========================================================
+const SPAIN_BESTSELLERS_DATABASE = [
+  {
+    id: 'rec-1',
+    title: 'La península de las casas vacías',
+    author: 'David Uclés',
+    genreCategory: 'historia',
+    genre: 'Ficción Histórica & Realismo Mágico',
+    rankText: '🏆 Fenómeno Librerías Independientes (CEGAL)',
+    synopsis: 'Una descomunal saga familiar en un pueblo de Jaén durante la Guerra Civil española narrada con un realismo mágico poético y desbordante. Considerada por críticos y lectores una de las novelas del año en España.',
+    hasBook: true,
+    hasAudio: true
+  },
+  {
+    id: 'rec-2',
+    title: 'Por si un día volvemos',
+    author: 'María Dueñas',
+    genreCategory: 'historia',
+    genre: 'Narrativa Emocional & Época',
+    rankText: '✨ Gran Lanzamiento Superventas',
+    synopsis: 'La esperadísima novela de la autora de «El tiempo entre costuras». Una emocionante historia sobre el exilio, la resiliencia femenina, la identidad y las segundas oportunidades en tiempos convulsos.',
+    hasBook: true,
+    hasAudio: true
+  },
+  {
+    id: 'rec-3',
+    title: 'El susurro del fuego',
+    author: 'Javier Castillo',
+    genreCategory: 'thriller',
+    genre: 'Novela Negra & Suspense Psicológico',
+    rankText: '🔥 Nº 1 en Suspense en España',
+    synopsis: 'El escritor malagueño superventas regresa con una trama asfixiante de secretos del pasado y giros constantes que no permiten soltar el libro ni pausar el audio.',
+    hasBook: true,
+    hasAudio: true
+  },
+  {
+    id: 'rec-4',
+    title: 'Alas de ónix (Empíreo 3)',
+    author: 'Rebecca Yarros',
+    genreCategory: 'cozy',
+    genre: 'Romantasy & Aventura Épica',
+    rankText: '🐉 Éxito Mundial en Librerías de España',
+    synopsis: 'El fenómeno de fantasía, jinetes de dragón y romance que arrasa en Casa del Libro y Fnac. Una lectura trepidante de lealtades puestas a prueba y pasiones intensas.',
+    hasBook: true,
+    hasAudio: true
+  },
+  {
+    id: 'rec-5',
+    title: 'Un animal salvaje',
+    author: 'Joël Dicker',
+    genreCategory: 'thriller',
+    genre: 'Thriller Psicológico',
+    rankText: '🔍 Top Ficción Traducida en España',
+    synopsis: 'Ginebra, 2022. Dos atracadores planean el asalto a una gran joyería mientras las apariencias de una familia perfecta comienzan a resquebrajarse sin remedio.',
+    hasBook: true,
+    hasAudio: true
+  },
+  {
+    id: 'rec-6',
+    title: 'La isla de la mujer dormida',
+    author: 'Arturo Pérez-Reverte',
+    genreCategory: 'historia',
+    genre: 'Aventura, Mar y Espías',
+    rankText: '🌊 Top Ventas Ficción Contemporánea',
+    synopsis: 'En una pequeña isla griega del mar Egeo en 1937, una misión clandestina de torpederos y espías se cruza con un triángulo de pasiones y honor.',
+    hasBook: true,
+    hasAudio: true
+  },
+  {
+    id: 'rec-7',
+    title: 'La asistenta',
+    author: 'Freida McFadden',
+    genreCategory: 'thriller',
+    genre: 'Thriller Doméstico Adictivo',
+    rankText: '🎧 El Audiolibro Más Escuchado',
+    synopsis: 'Millie consigue trabajo como asistenta interna en la mansión de la familia Winchester. Pero la puerta del ático solo se cierra por fuera... Un éxito absoluto boca a boca.',
+    hasBook: true,
+    hasAudio: true
+  },
+  {
+    id: 'rec-8',
+    title: 'Blackwater (Saga Fluvial)',
+    author: 'Michael McDowell',
+    genreCategory: 'cozy',
+    genre: 'Saga Familiar & Gótico Sureño',
+    rankText: '🍂 El Fenómeno Editorial del Año',
+    synopsis: 'La crecida del río en Perdido, Alabama, y la misteriosa llegada de Elinor Dammert. Una saga matriarcal hipnótica publicada en elegantes volúmenes que agotaron tiradas.',
+    hasBook: true,
+    hasAudio: true
+  },
+  {
+    id: 'rec-9',
+    title: 'Victoria',
+    author: 'Paloma Sánchez-Garnica',
+    genreCategory: 'historia',
+    genre: 'Drama Histórico & Superación',
+    rankText: '🏆 Premio Planeta de Novela',
+    synopsis: 'Berlín tras la Segunda Guerra Mundial y el Nueva York de los años cincuenta. La lucha de una mujer por proteger a su familia frente al espionaje y la intolerancia.',
+    hasBook: true,
+    hasAudio: true
+  },
+  {
+    id: 'rec-10',
+    title: 'Las que no duermen: NASH',
+    author: 'Dolores Redondo',
+    genreCategory: 'thriller',
+    genre: 'Misterio & Mitología Vasconavarra',
+    rankText: '🌲 Top Suspense en el Norte',
+    synopsis: 'La prestigiosa psicóloga forense Nash Elizondo investiga una muerte en los valles nevados de Navarra, descubriendo secretos de brujería y crímenes sepultados.',
+    hasBook: true,
+    hasAudio: true
+  },
+  {
+    id: 'rec-11',
+    title: 'Donde todo brilla',
+    author: 'Alice Kellen',
+    genreCategory: 'cozy',
+    genre: 'Romance Cálido & Sentimiento',
+    rankText: '☕ Favorito Cozy & Emoción',
+    synopsis: 'La infancia compartida en un pequeño pueblo costero de Maine, la pesca de langostas, el olor a madera y salitre, y un amor que madura con el paso de los años.',
+    hasBook: true,
+    hasAudio: true
+  },
+  {
+    id: 'rec-12',
+    title: 'Los tres mundos (Serie César 3)',
+    author: 'Santiago Posteguillo',
+    genreCategory: 'historia',
+    genre: 'Novela Histórica Romana',
+    rankText: '🏛️ Bestseller Histórico en España',
+    synopsis: 'Santiago Posteguillo nos sumerge con su pulso magistral en los años decisivos de Julio César entre la Galia, Roma y el destino del Imperio.',
+    hasBook: true,
+    hasAudio: true
+  },
+  {
+    id: 'rec-13',
+    title: 'El clan',
+    author: 'Carmen Mola',
+    genreCategory: 'thriller',
+    genre: 'Novela Negra Española',
+    rankText: '⚡ Cierre de la Saga Elena Blanco',
+    synopsis: 'El impactante desenlace de la serie policíaca más vendida en España. Ritmo vertiginoso, corrupción al más alto nivel y giros inesperados.',
+    hasBook: true,
+    hasAudio: true
+  },
+  {
+    id: 'rec-14',
+    title: 'La sociedad de la nieve',
+    author: 'Pablo Vierci',
+    genreCategory: 'historia',
+    genre: 'Superación Humana & Hermandad',
+    rankText: '🏔️ Gran Éxito Testimonial',
+    synopsis: 'El relato definitivo y profundamente conmovedor de los dieciséis supervivientes del accidente de los Andes, convertidos en una sociedad de afecto y entrega.',
+    hasBook: true,
+    hasAudio: true
+  },
+  {
+    id: 'rec-15',
+    title: 'En agosto nos vemos',
+    author: 'Gabriel García Márquez',
+    genreCategory: 'cozy',
+    genre: 'Literatura & Deseo',
+    rankText: '🌺 Joya Póstuma del Nobel',
+    synopsis: 'Cada mes de agosto, Ana Magdalena Bach viaja en transbordador hasta la isla donde está enterrada su madre. Una hermosa meditación sobre la libertad y la madurez.',
+    hasBook: true,
+    hasAudio: true
+  },
+  {
+    id: 'rec-16',
+    title: 'La biblioteca de la medianoche',
+    author: 'Matt Haig',
+    genreCategory: 'cozy',
+    genre: 'Ficción Reflexiva & Esperanza',
+    rankText: '☕ Un Clásico Moderno en España',
+    synopsis: 'Entre la vida y la muerte hay una biblioteca donde cada libro ofrece la oportunidad de vivir otra vida que pudiste haber elegido. Profundamente reconfortante.',
+    hasBook: true,
+    hasAudio: true
+  }
+];
+
+function getWeekNumber(d = new Date()) {
+  const target = new Date(d.valueOf());
+  const dayNr = (d.getDay() + 6) % 7;
+  target.setDate(target.getDate() - dayNr + 3);
+  const firstThursday = target.valueOf();
+  target.setMonth(0, 1);
+  if (target.getDay() !== 4) {
+    target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+  }
+  return 1 + Math.ceil((firstThursday - target) / 604800000);
+}
+
+function renderSpainRecommendations() {
+  const container = document.getElementById('reading-recs-container');
+  const tagEl = document.getElementById('recsWeekTag');
+  if (!container) return;
+
+  const now = new Date();
+  const weekNum = getWeekNumber(now);
+  const year = now.getFullYear();
+
+  if (tagEl) {
+    tagEl.textContent = `Semana ${weekNum} · ${year}`;
+  }
+
+  // Filtrado de recomendaciones
+  let items = SPAIN_BESTSELLERS_DATABASE;
+  if (currentRecFilter === 'thriller') {
+    items = items.filter(x => x.genreCategory === 'thriller');
+  } else if (currentRecFilter === 'historia') {
+    items = items.filter(x => x.genreCategory === 'historia');
+  } else if (currentRecFilter === 'cozy') {
+    items = items.filter(x => x.genreCategory === 'cozy');
+  } else if (currentRecFilter === 'audio') {
+    items = items.filter(x => x.hasAudio);
+  }
+
+  // Rotación semanal dinámica: destaca los libros según la semana del año
+  const sorted = [...items].sort((a, b) => {
+    const idxA = (SPAIN_BESTSELLERS_DATABASE.indexOf(a) + weekNum) % SPAIN_BESTSELLERS_DATABASE.length;
+    const idxB = (SPAIN_BESTSELLERS_DATABASE.indexOf(b) + weekNum) % SPAIN_BESTSELLERS_DATABASE.length;
+    return idxA - idxB;
+  });
+
+  const wishlistTitles = (appData.readingWishlist || []).map(x => x.title.toLowerCase().trim());
+  const readingTitles = (appData.reading || []).map(x => x.title.toLowerCase().trim());
+
+  container.innerHTML = sorted.map(book => {
+    const isAlreadyInWish = wishlistTitles.includes(book.title.toLowerCase().trim());
+    const isAlreadyReading = readingTitles.includes(book.title.toLowerCase().trim());
+
+    let btnText = '+ Añadir a mi lista 🔖';
+    let btnClass = 'btn-add-rec';
+
+    if (isAlreadyInWish) {
+      btnText = '✓ En tus pendientes 🔖';
+      btnClass = 'btn-add-rec added';
+    } else if (isAlreadyReading) {
+      btnText = '📖 En tus lecturas actuales';
+      btnClass = 'btn-add-rec added';
+    }
+
+    return `
+      <div class="rec-card" data-rec-id="${book.id}">
+        <span class="rec-rank-ribbon">${escapeHtml(book.rankText)}</span>
+        <h3 class="rec-title">${escapeHtml(book.title)}</h3>
+        <div class="rec-author">de <strong>${escapeHtml(book.author)}</strong> · <em>${escapeHtml(book.genre)}</em></div>
+        <p class="rec-synopsis">${escapeHtml(book.synopsis)}</p>
+
+        <div class="rec-meta-row">
+          <div class="rec-badges-list">
+            ${book.hasBook ? '<span class="badge-format-pill book">📖 Papel / eBook</span>' : ''}
+            ${book.hasAudio ? '<span class="badge-format-pill audio">🎧 Audiolibro</span>' : ''}
+          </div>
+          <button class="${btnClass}" onclick="addToWishlistFromRec('${book.id}')" ${isAlreadyInWish || isAlreadyReading ? 'title="Ya está guardado"' : ''}>
+            ${btnText}
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function filterRecommendations(category, btn) {
+  currentRecFilter = category;
+  document.querySelectorAll('.recs-filter-bar .filter-pill').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderSpainRecommendations();
+  vibratePhone(15);
+}
+
+function addToWishlistFromRec(bookId) {
+  const book = SPAIN_BESTSELLERS_DATABASE.find(x => x.id === bookId);
+  if (!book) return;
+
+  if (!Array.isArray(appData.readingWishlist)) appData.readingWishlist = [];
+
+  const exists = appData.readingWishlist.some(x => x.title.toLowerCase().trim() === book.title.toLowerCase().trim());
+  if (exists) {
+    alert(`«${book.title}» ya está en tu lista de libros por leer.`);
+    return;
+  }
+
+  const newWish = {
+    id: 'wish-' + Date.now(),
+    title: book.title,
+    author: book.author,
+    genre: book.genre,
+    format: book.hasAudio ? 'any' : 'book',
+    notes: `Recomendado en el Top de España: ${book.rankText}`,
+    createdAt: new Date().toISOString()
+  };
+
+  appData.readingWishlist.unshift(newWish);
+  saveData();
+  vibratePhone(40);
+  renderReading();
 }
 
 function handleDirectPageChange(id, val, total) {
@@ -1586,6 +2262,12 @@ function openNewProjectModal(hobby) {
   const modalId = `modal-${hobby}`;
   const modal = document.getElementById(modalId);
   if (modal) {
+    if (hobby === 'reading') {
+      const form = document.getElementById('form-reading');
+      if (form) form.reset();
+      setReadingFormat('book');
+      resetStarRatingInput();
+    }
     modal.classList.add('open');
     const firstInput = modal.querySelector('input');
     if (firstInput) setTimeout(() => firstInput.focus(), 100);
@@ -1669,13 +2351,12 @@ function handleSaveDiamond(e) {
   vibratePhone(30);
 }
 
-// Guardar nuevo libro
+// Guardar nuevo libro o audiolibro
 function handleSaveReading(e) {
   e.preventDefault();
+  const format = document.getElementById('reading-format').value || 'book';
   const title = document.getElementById('reading-title').value.trim();
   const author = document.getElementById('reading-author').value.trim();
-  const currentPage = Math.max(0, parseInt(document.getElementById('reading-current-page').value, 10) || 0);
-  const totalPages = Math.max(1, parseInt(document.getElementById('reading-total-pages').value, 10) || 1);
   const rating = parseInt(document.getElementById('reading-rating').value, 10) || 0;
   const quotes = document.getElementById('reading-quotes').value.trim();
 
@@ -1685,18 +2366,30 @@ function handleSaveReading(e) {
     id: 'reading-' + Date.now(),
     title,
     author,
-    currentPage: Math.min(totalPages, currentPage),
-    totalPages,
+    format,
     rating,
     quotes,
     createdAt: new Date().toISOString()
   };
+
+  if (format === 'audiobook') {
+    const audioProgress = Math.min(100, Math.max(0, parseInt(document.getElementById('reading-audio-progress').value, 10) || 0));
+    const audioDuration = document.getElementById('reading-audio-duration').value.trim();
+    newBook.audioProgress = audioProgress;
+    newBook.audioDuration = audioDuration;
+  } else {
+    const currentPage = Math.max(0, parseInt(document.getElementById('reading-current-page').value, 10) || 0);
+    const totalPages = Math.max(1, parseInt(document.getElementById('reading-total-pages').value, 10) || 1);
+    newBook.currentPage = Math.min(totalPages, currentPage);
+    newBook.totalPages = totalPages;
+  }
 
   appData.reading.unshift(newBook);
   saveData();
   renderReading();
   closeModal('modal-reading');
   document.getElementById('form-reading').reset();
+  setReadingFormat('book');
   resetStarRatingInput();
   vibratePhone(30);
 }
@@ -1773,6 +2466,7 @@ function importDataBackup(event) {
           crochet: Array.isArray(imported.crochet) ? imported.crochet : [],
           diamond: Array.isArray(imported.diamond) ? imported.diamond : [],
           reading: Array.isArray(imported.reading) ? imported.reading : [],
+          readingWishlist: Array.isArray(imported.readingWishlist) ? imported.readingWishlist : [],
           plants: Array.isArray(imported.plants) ? imported.plants : []
         };
         saveData();
