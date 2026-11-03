@@ -240,13 +240,79 @@
             <p>Un buen libro, una taza caliente y mil historias</p>
           </div>
           <button class="btn btn-primary btn-banner-action" onclick="openNewProjectModal('reading')">
-            + Nuevo Libro
+            + Nuevo Libro / Audio
           </button>
         </div>
       </div>
 
-      <div id="reading-list" class="cards-container">
-        <!-- Tarjetas dinámicas -->
+      <!-- Barra de sub-pestañas acogedora para Lectura -->
+      <div class="reading-subnav-bar">
+        <button id="btn-reading-sub-active" class="reading-subnav-btn active" onclick="switchReadingSubnav('active')">
+          <span class="subnav-icon">📖</span>
+          <span class="subnav-label">Mis Lecturas</span>
+          <span class="subnav-badge" id="badge-reading-count">0</span>
+        </button>
+        <button id="btn-reading-sub-wishlist" class="reading-subnav-btn" onclick="switchReadingSubnav('wishlist')">
+          <span class="subnav-icon">🔖</span>
+          <span class="subnav-label">Por Leer (Deseos)</span>
+          <span class="subnav-badge" id="badge-wishlist-count">0</span>
+        </button>
+        <button id="btn-reading-sub-recs" class="reading-subnav-btn" onclick="switchReadingSubnav('recs')">
+          <span class="subnav-icon">🇪🇸</span>
+          <span class="subnav-label">Top España</span>
+          <span class="subnav-badge pulse">Semanal</span>
+        </button>
+      </div>
+
+      <!-- VISTA 1: Mis Lecturas Actuales y Terminadas (Libros y Audiolibros) -->
+      <div id="reading-subview-active" class="reading-subview active">
+        <div id="reading-list" class="cards-container">
+          <!-- Tarjetas dinámicas generadas en JavaScript -->
+        </div>
+      </div>
+
+      <!-- VISTA 2: Lista de Libros que quiero leer (Wishlist / Pendientes) -->
+      <div id="reading-subview-wishlist" class="reading-subview" style="display:none;">
+        <div class="wishlist-header-banner">
+          <div class="wishlist-banner-info">
+            <h3>Libros que quiero leer 🔖</h3>
+            <p>Tu lista de próximas lecturas, deseos y recomendaciones pendientes.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openWishlistModal()">
+            + Añadir a Por Leer
+          </button>
+        </div>
+
+        <div id="reading-wishlist-container" class="cards-container">
+          <!-- Tarjetas dinámicas de libros por leer -->
+        </div>
+      </div>
+
+      <!-- VISTA 3: Recomendaciones Semanales de España -->
+      <div id="reading-subview-recs" class="reading-subview" style="display:none;">
+        <div class="recs-header-banner">
+          <div class="recs-banner-badge">
+            <span>🇪🇸 Ranking Oficial · Actualizado</span>
+            <span class="recs-week-tag" id="recsWeekTag">Semana Actual</span>
+          </div>
+          <h3 class="recs-banner-title">Los Libros Más Leídos en España</h3>
+          <p class="recs-banner-desc">
+            Selección actualizada semanalmente según los datos de venta y biblioteca de <strong>TodosTusLibros (CEGAL)</strong> y <strong>Casa del Libro</strong>. Toca en el botón para guardar cualquiera en tu lista de libros por leer.
+          </p>
+
+          <!-- Filtro de géneros para recomendaciones -->
+          <div class="recs-filter-bar">
+            <button class="filter-pill active" onclick="filterRecommendations('all', this)">Todos los destacados</button>
+            <button class="filter-pill" onclick="filterRecommendations('thriller', this)">🔍 Thriller & Suspense</button>
+            <button class="filter-pill" onclick="filterRecommendations('historia', this)">🏰 Ficción Histórica</button>
+            <button class="filter-pill" onclick="filterRecommendations('cozy', this)">🍂 Cozy, Romance & Sentimiento</button>
+            <button class="filter-pill" onclick="filterRecommendations('audio', this)">🎧 Top en Audiolibro</button>
+          </div>
+        </div>
+
+        <div id="reading-recs-container" class="cards-container">
+          <!-- Tarjetas dinámicas de recomendaciones -->
+        </div>
       </div>
     </section>
 
@@ -506,32 +572,68 @@
     </div>
   </div>
 
-  <!-- Modal: Nuevo Libro -->
+  <!-- Modal: Nuevo Libro o Audiolibro -->
   <div id="modal-reading" class="modal-overlay">
     <div class="modal-box">
       <div class="modal-header">
-        <h3>☕ Nuevo Libro</h3>
+        <h3 id="modal-reading-title">☕ Nuevo Libro o Audiolibro</h3>
         <button class="modal-close" onclick="closeModal('modal-reading')">&times;</button>
       </div>
       <form id="form-reading" onsubmit="handleSaveReading(event)">
+        <!-- Selector de formato: Libro físico/digital vs Audiolibro -->
         <div class="form-group">
-          <label for="reading-title">Título del libro *</label>
-          <input type="text" id="reading-title" placeholder="Ej: La biblioteca de la medianoche" required>
+          <label>Formato de la obra *</label>
+          <div class="format-toggle-grid">
+            <button type="button" id="btn-format-book" class="format-choice-btn active" onclick="setReadingFormat('book')">
+              <span class="format-icon">📖</span>
+              <span class="format-title">Libro Físico / eBook</span>
+              <span class="format-desc">Contador de páginas</span>
+            </button>
+            <button type="button" id="btn-format-audiobook" class="format-choice-btn" onclick="setReadingFormat('audiobook')">
+              <span class="format-icon">🎧</span>
+              <span class="format-title">Audiolibro</span>
+              <span class="format-desc">Sin páginas · Progreso libre</span>
+            </button>
+          </div>
+          <input type="hidden" id="reading-format" value="book">
+        </div>
+
+        <div class="form-group">
+          <label for="reading-title">Título *</label>
+          <input type="text" id="reading-title" placeholder="Ej: La península de las casas vacías" required>
         </div>
         <div class="form-group">
           <label for="reading-author">Autor / Autora</label>
-          <input type="text" id="reading-author" placeholder="Ej: Matt Haig">
+          <input type="text" id="reading-author" placeholder="Ej: David Uclés">
         </div>
-        <div class="form-row">
+
+        <!-- Campos para Libro Impreso / Digital (con páginas) -->
+        <div id="fields-book-pages" class="form-row">
           <div class="form-group">
             <label for="reading-current-page">Página actual</label>
             <input type="number" id="reading-current-page" min="0" value="0">
           </div>
           <div class="form-group">
             <label for="reading-total-pages">Total de páginas *</label>
-            <input type="number" id="reading-total-pages" min="1" placeholder="Ej: 340" required>
+            <input type="number" id="reading-total-pages" min="1" placeholder="Ej: 340">
           </div>
         </div>
+
+        <!-- Campos para Audiolibro (sin páginas) -->
+        <div id="fields-audiobook-progress" class="form-group" style="display:none;">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="reading-audio-progress">Progreso de escucha (%)</label>
+              <input type="number" id="reading-audio-progress" min="0" max="100" value="0" placeholder="0 - 100">
+            </div>
+            <div class="form-group">
+              <label for="reading-audio-duration">Duración estimada (opcional)</label>
+              <input type="text" id="reading-audio-duration" placeholder="Ej: 9h 45m o 12 cap.">
+            </div>
+          </div>
+          <small class="field-hint">💡 En audiolibros no necesitas contar páginas; registra tu avance a tu ritmo.</small>
+        </div>
+
         <div class="form-group">
           <label>Valoración</label>
           <div class="star-rating-input" id="new-book-rating">
@@ -545,11 +647,53 @@
         </div>
         <div class="form-group">
           <label for="reading-quotes">Citas favoritas o reflexiones</label>
-          <textarea id="reading-quotes" rows="3" placeholder="Frases hermosas o lo que te hace sentir el libro..."></textarea>
+          <textarea id="reading-quotes" rows="3" placeholder="Frases hermosas, reflexiones sobre la narración o lo que te hace sentir..."></textarea>
         </div>
         <div class="modal-actions">
           <button type="button" class="btn btn-secondary" onclick="closeModal('modal-reading')">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Guardar Libro</button>
+          <button type="submit" class="btn btn-primary">Guardar en Mis Lecturas</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Nuevo Libro en Lista de Deseos (Por Leer) -->
+  <div id="modal-wishlist" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>🔖 Añadir a Libros que quiero leer</h3>
+        <button class="modal-close" onclick="closeModal('modal-wishlist')">&times;</button>
+      </div>
+      <form id="form-wishlist" onsubmit="handleSaveWishlist(event)">
+        <div class="form-group">
+          <label for="wishlist-title">Título del libro *</label>
+          <input type="text" id="wishlist-title" placeholder="Ej: Por si un día volvemos" required>
+        </div>
+        <div class="form-group">
+          <label for="wishlist-author">Autor / Autora</label>
+          <input type="text" id="wishlist-author" placeholder="Ej: María Dueñas">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="wishlist-genre">Género o Temática</label>
+            <input type="text" id="wishlist-genre" placeholder="Ej: Ficción histórica, Novela negra...">
+          </div>
+          <div class="form-group">
+            <label for="wishlist-format">Preferencia</label>
+            <select id="wishlist-format" class="custom-select">
+              <option value="book">📖 Libro físico / eBook</option>
+              <option value="audiobook">🎧 Audiolibro</option>
+              <option value="any">✨ Indiferente</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="wishlist-notes">¿Por qué quieres leerlo? / ¿Quién te lo recomendó?</label>
+          <textarea id="wishlist-notes" rows="3" placeholder="Ej: Me lo recomendó una amiga; novela revelación en librerías de España."></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-wishlist')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar en mi Lista</button>
         </div>
       </form>
     </div>
